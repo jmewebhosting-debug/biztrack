@@ -386,7 +386,7 @@ const SettingsPage: React.FC = () => {
       <div className="glass p-5 flex flex-col gap-4">
         <SectionHeader icon={<Info />} title="App Information" color="#94a3b8" />
         {[
-          { label: 'Version', value: '2.0.0-PRO' },
+          { label: 'Version', value: '3.0.0-ULTIMATE' },
           { label: 'Storage Engine', value: 'IndexedDB (Dexie)' },
           { label: 'Session', value: '24-hour PIN unlock' },
           { label: 'Build', value: 'May-2026-STABLE' },
