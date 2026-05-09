@@ -147,8 +147,6 @@ const Dashboard: React.FC = () => {
   const MONTHLY_TARGET = 50000;
   const progressPct = Math.min((profit / MONTHLY_TARGET) * 100, 100);
 
-  const progressPct = Math.min((profit / MONTHLY_TARGET) * 100, 100);
-
   const [isRenewalsOpen, setIsRenewalsOpen] = React.useState(false);
 
   return (
