@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { FileText, Search, MessageCircle, FileDown, Calendar, Filter, ChevronRight, User, ShoppingBag, Clock } from 'lucide-react';
+import { FileText, Search, MessageCircle, FileDown, Calendar, Filter, ChevronRight, User, ShoppingBag, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { format, isSameDay, subDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateInvoice } from '../utils/pdf';
@@ -30,38 +30,41 @@ const InvoicesPage: React.FC = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, x: -10 },
-    visible: { opacity: 1, x: 0 }
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-6 max-w-md mx-auto">
+      <div className="flex justify-between items-center px-1">
         <div>
-          <h2 className="text-2xl font-bold font-heading">Invoices Hub</h2>
-          <p className="text-xs text-text-muted">Quick share & manage billing</p>
+          <h2 className="text-2xl font-black font-heading tracking-tight">Invoices Hub</h2>
+          <p className="text-[11px] text-text-muted font-bold uppercase tracking-widest">Billing & Distribution</p>
+        </div>
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+           <FileText size={20} />
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col gap-4">
+      {/* Modern Search & Filters */}
+      <div className="flex flex-col gap-3">
         <div className="relative group">
           <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted group-focus-within:text-primary transition-colors" size={16} />
           <input 
             type="text" 
             placeholder="Search by customer or product..." 
-            className="pl-11 h-12 text-sm bg-white/[0.03]"
+            className="pl-11 h-13 text-sm bg-white/[0.04] border-white/5 rounded-2xl focus:border-primary/30 focus:bg-white/[0.06] transition-all"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <div className="flex p-1 glass bg-white/5 rounded-2xl overflow-hidden">
+        <div className="flex p-1.5 glass bg-white/[0.02] rounded-2xl border border-white/5">
           {(['today', 'yesterday', 'all'] as const).map((f) => (
             <button 
               key={f}
               onClick={() => setDateFilter(f)}
-              className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${dateFilter === f ? 'bg-primary text-white shadow-lg' : 'text-text-muted'}`}
+              className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${dateFilter === f ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-text-muted hover:text-text-main'}`}
             >
               {f}
             </button>
@@ -69,21 +72,23 @@ const InvoicesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Invoice List */}
+      {/* Redesigned Invoice List */}
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
       >
         {filteredInvoices.length > 0 ? (
           filteredInvoices.map((invoice) => (
             <InvoiceCard key={invoice.id} invoice={invoice} variants={itemVariants} />
           ))
         ) : (
-          <div className="glass p-12 text-center flex flex-col items-center gap-3 opacity-60">
-             <FileText size={40} className="text-text-muted" />
-             <p className="text-sm font-medium">No invoices found for this period.</p>
+          <div className="glass p-16 text-center flex flex-col items-center gap-4 opacity-60 border-dashed border-2">
+             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+                <FileText size={32} className="text-text-muted opacity-30" />
+             </div>
+             <p className="text-sm font-bold text-text-muted">No invoices found.</p>
           </div>
         )}
       </motion.div>
@@ -104,50 +109,56 @@ const InvoiceCard: React.FC<{ invoice: any; variants: any }> = ({ invoice, varia
   return (
     <motion.div 
       variants={variants}
-      className="glass p-4 flex flex-col gap-4 border-l-4 card-hover overflow-hidden relative"
-      style={{ borderLeftColor: isPaid ? '#10b981' : '#f59e0b' }}
+      className="glass overflow-hidden flex flex-col border border-white/5 shadow-xl hover:border-primary/20 transition-all duration-300"
     >
-      <div className="flex justify-between items-start">
-        <div className="flex gap-3">
-           <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary border border-white/10">
-              <FileText size={20} />
+      {/* Top Section */}
+      <div className="p-4 flex justify-between items-start bg-white/[0.02]">
+        <div className="flex gap-3.5">
+           <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${isPaid ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
+              {isPaid ? <CheckCircle2 size={22} /> : <AlertCircle size={22} />}
            </div>
-           <div>
-              <h4 className="text-sm font-bold truncate max-w-[150px]">{invoice.customerName}</h4>
-              <p className="text-[10px] text-text-muted font-medium flex items-center gap-1">
-                 <Clock size={10} /> {format(new Date(invoice.date), 'hh:mm a')}
-              </p>
+           <div className="flex flex-col gap-0.5">
+              <h4 className="text-base font-bold text-text-main leading-tight">{invoice.customerName}</h4>
+              <div className="flex items-center gap-2">
+                <span className="text-[9px] font-black text-text-muted uppercase tracking-tighter bg-white/5 px-1.5 py-0.5 rounded">INV-{invoice.id?.toString().padStart(4, '0')}</span>
+                <span className="text-[10px] text-text-muted flex items-center gap-1 font-medium">
+                  <Clock size={10} /> {format(new Date(invoice.date), 'dd MMM, hh:mm a')}
+                </span>
+              </div>
            </div>
         </div>
-        <div className="text-right">
-           <p className="text-sm font-black">₹{invoice.price.toLocaleString()}</p>
-           <span className={`text-[8px] font-bold px-2 py-0.5 rounded-md uppercase tracking-tighter ${isPaid ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
-              {isPaid ? 'Fully Paid' : `Due: ₹${balance}`}
-           </span>
+        <div className="flex flex-col items-end">
+           <p className="text-lg font-black text-text-main leading-none">₹{invoice.price.toLocaleString()}</p>
+           <p className={`text-[9px] font-black uppercase tracking-widest mt-1.5 ${isPaid ? 'text-emerald-400' : 'text-amber-500'}`}>
+              {isPaid ? 'Fully Settled' : `Pending: ₹${balance}`}
+           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mt-1">
+      {/* Product Summary */}
+      <div className="px-4 pb-4">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+           <ShoppingBag size={14} className="text-primary" />
+           <p className="text-[11px] font-bold text-text-main/80 truncate">
+              {invoice.productName} {invoice.items && invoice.items.length > 1 ? `(+${invoice.items.length - 1} more items)` : ''}
+           </p>
+        </div>
+      </div>
+
+      {/* Action Bar */}
+      <div className="flex border-t border-white/5 bg-white/[0.01]">
          <button 
             onClick={handleWhatsApp}
-            className="flex items-center justify-center gap-2 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 text-[10px] font-black border border-emerald-500/20 active:scale-95 transition-all"
+            className="flex-1 flex items-center justify-center gap-2.5 h-13 text-emerald-400 hover:bg-emerald-500/10 transition-all font-black text-[10px] tracking-wider uppercase border-r border-white/5"
          >
-            <MessageCircle size={14} /> SEND WHATSAPP
+            <MessageCircle size={16} /> Share WhatsApp
          </button>
          <button 
             onClick={() => generateInvoice(invoice)}
-            className="flex items-center justify-center gap-2 h-10 rounded-xl bg-primary/10 text-primary text-[10px] font-black border border-primary/20 active:scale-95 transition-all"
+            className="flex-1 flex items-center justify-center gap-2.5 h-13 text-primary hover:bg-primary/10 transition-all font-black text-[10px] tracking-wider uppercase"
          >
-            <FileDown size={14} /> DOWNLOAD PDF
+            <FileDown size={16} /> Get PDF Invoice
          </button>
-      </div>
-
-      {/* Details Snapshot */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/5">
-         <ShoppingBag size={12} className="text-text-muted" />
-         <p className="text-[10px] font-bold text-text-muted truncate">
-            Items: {invoice.productName} {invoice.items ? `+ ${invoice.items.length - 1} more` : ''}
-         </p>
       </div>
     </motion.div>
   );
