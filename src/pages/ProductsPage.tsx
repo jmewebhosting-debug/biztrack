@@ -98,13 +98,23 @@ const AddProductModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="glass w-full max-w-md z-50 flex flex-col" >
-        <div className="p-6 border-b border-white/5">
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <motion.div 
+        initial={{ y: '100%' }} 
+        animate={{ y: 0 }} 
+        exit={{ y: '100%' }} 
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="bottom-sheet w-full max-w-md z-50 flex flex-col" 
+      >
+        <div className="sheet-handle" />
+        <div className="p-6 pt-2 border-b border-white/5 flex justify-between items-center">
           <h3 className="text-xl font-bold font-heading">New Product Template</h3>
+          <button onClick={onClose} className="p-2 rounded-xl bg-white/5 text-text-muted">
+            <Plus size={24} className="rotate-45" />
+          </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 modal-form-container">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-text-muted">Category</label>
             <div className="grid grid-cols-3 gap-2">

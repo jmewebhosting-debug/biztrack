@@ -54,7 +54,7 @@ const SalesPage: React.FC = () => {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+        <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted" size={18} />
         <input 
           type="text" 
           placeholder="Search product or customer..." 
@@ -242,7 +242,7 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             <Plus size={24} className="rotate-45" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 max-h-[80vh] overflow-y-auto pb-12">
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 modal-form-container">
           {products.length > 0 && (
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Quick Pick from Catalog</label>
@@ -257,7 +257,7 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <option key={p.id} value={p.id}>{p.name} (₹{p.price})</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={18} />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-half text-text-muted pointer-events-none" size={18} />
               </div>
             </div>
           )}
@@ -340,7 +340,7 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <option value="365">Yearly (365 Days)</option>
                 <option value="0">Life-time Access</option>
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={18} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-half text-text-muted pointer-events-none" size={18} />
             </div>
           </div>
 

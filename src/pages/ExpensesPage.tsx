@@ -59,7 +59,7 @@ const ExpensesPage: React.FC = () => {
       </div>
 
       <div className="relative">
-        <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+        <Filter className="absolute left-4 top-1/2 -translate-y-half text-text-muted" size={18} />
         <input 
           type="text" 
           placeholder="Filter by member name..." 
@@ -168,7 +168,7 @@ const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
              <Plus size={24} className="rotate-45" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 pb-12">
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 modal-form-container">
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Expense Category</label>
             <input required placeholder="e.g. Server Bill, Office Rent, Tea" className="h-12 text-base" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
@@ -188,7 +188,7 @@ const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <option key={acc.id} value={acc.id}>{acc.name}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={18} />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-half text-text-muted pointer-events-none" size={18} />
             </div>
           </div>
 

@@ -36,7 +36,7 @@ const CustomersPage: React.FC = () => {
       <h2 className="text-2xl font-bold font-heading">Customer CRM</h2>
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+        <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted" size={18} />
         <input 
           type="text" 
           placeholder="Search customer name..." 

@@ -77,13 +77,13 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 px-4 py-6 app-container overflow-y-auto">
+      <main className="flex-1 px-4 pt-6 pb-28 app-container overflow-y-auto">
         {children}
       </main>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 glass-dark border-t border-white/5 w-full">
-        <div className="max-w-[600px] mx-auto flex justify-around items-center px-2 pb-2 pt-1">
+        <div className="max-w-600px mx-auto flex justify-around items-center px-2 pb-2 pt-1">
           {mainNavItems.map((item) => (
             <NavItem 
               key={item.to} 
@@ -118,14 +118,14 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md"
+              className="fixed inset-0 z-60 bg-black/80 backdrop-blur-md"
             />
             <motion.div 
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 z-[70] glass p-6 pb-12 rounded-t-[2.5rem] border-t border-white/10 max-w-[600px] mx-auto"
+              className="fixed bottom-0 left-0 right-0 z-70 glass p-6 pb-12 rounded-t-drawer border-t border-white/10 max-w-600px mx-auto"
             >
               <div className="flex justify-between items-center mb-8">
                 <div>

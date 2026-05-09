@@ -283,7 +283,7 @@ const AddEntryModal: React.FC<{ activeTab: 'dues' | 'providers'; onClose: () => 
                       <option value="">Choose Provider...</option>
                       {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={18} />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-half text-text-muted pointer-events-none" size={18} />
                   </div>
                   <button type="button" onClick={async () => {
                     const name = prompt('New Provider Name:');

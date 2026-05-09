@@ -38,7 +38,7 @@ const AppLock: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
   }, [pin, savedPin, isSettingPin, onUnlock]);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-bg-dark flex flex-col items-center justify-center p-8">
+    <div className="fixed inset-0 z-100 bg-bg-dark flex flex-col items-center justify-center p-8">
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
