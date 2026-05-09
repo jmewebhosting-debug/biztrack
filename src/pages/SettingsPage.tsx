@@ -3,7 +3,6 @@ import { Download, Upload, Trash2, ShieldCheck, Database, Info, HardDrive, Bell 
 import { exportData, importData, exportToCSV } from '../utils/backup';
 import { requestNotificationPermission } from '../utils/notifications';
 import { db } from '../db/db';
-import { motion } from 'framer-motion';
 
 const SettingsPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);

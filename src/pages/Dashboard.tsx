@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, DollarSign, ArrowUpRight, Plus, ShoppingBag, CreditCard, Box, Users, Wallet, IndianRupee } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, Plus, ShoppingBag, CreditCard, Box, Users, Wallet, IndianRupee } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useFinanceSummary } from '../hooks/useFinance';
 import { motion } from 'framer-motion';

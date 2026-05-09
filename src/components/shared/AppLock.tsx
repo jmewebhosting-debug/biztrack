@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Delete, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, Delete } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AppLock: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
   const [pin, setPin] = useState('');
@@ -8,7 +8,7 @@ const AppLock: React.FC<{ onUnlock: () => void }> = ({ onUnlock }) => {
   const savedPin = localStorage.getItem('app_pin');
 
   // If no PIN is set, allow the user to set one first time
-  const [isSettingPin, setIsSettingPin] = useState(!savedPin);
+  const isSettingPin = !savedPin;
 
   const handleInput = (val: string) => {
     if (pin.length < 4) {

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Search, Calendar, RefreshCcw, Trash2, Edit2, ChevronDown, FileDown, TrendingUp, DollarSign, ArrowUpRight } from 'lucide-react';
+import { Plus, Search, Calendar, RefreshCcw, Trash2, ChevronDown, FileDown, TrendingUp, ArrowUpRight } from 'lucide-react';
 import { generateInvoice } from '../utils/pdf';
-import { format, addDays, isSameDay } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Category, Sale } from '../types';
 
@@ -16,8 +16,6 @@ const SalesPage: React.FC = () => {
     s.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.customerName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const totalSalesCount = filteredSales.length;
   const totalRevenue = filteredSales.reduce((acc, s) => acc + s.price, 0);
   const totalProfit = filteredSales.reduce((acc, s) => acc + s.profit, 0);
 

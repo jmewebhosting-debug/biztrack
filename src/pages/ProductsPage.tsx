@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Box, Edit2, Trash2, Tag, Layers } from 'lucide-react';
+import { Plus, Box, Edit2, Trash2, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Product, Category } from '../types';
+import type { Category } from '../types';
 
 const ProductsPage: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);

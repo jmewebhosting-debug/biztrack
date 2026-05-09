@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Users, ArrowUpCircle, ArrowDownCircle, CheckCircle2, History, Trash2, IndianRupee, MessageCircle, AlertCircle, Clock } from 'lucide-react';
+import { Plus, Users, ArrowUpCircle, ArrowDownCircle, CheckCircle2, History, Trash2, IndianRupee, MessageCircle, AlertCircle, Clock, ChevronDown } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Due, ProviderTransaction } from '../types';
+import type { Due } from '../types';
 
 const DuesPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dues' | 'providers'>('dues');

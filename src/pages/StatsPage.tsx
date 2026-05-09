@@ -1,8 +1,8 @@
 import React from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
-import { format, startOfDay, subDays } from 'date-fns';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
+import { format, subDays } from 'date-fns';
 import { TrendingUp, Award, Box, Zap } from 'lucide-react';
 
 const StatsPage: React.FC = () => {

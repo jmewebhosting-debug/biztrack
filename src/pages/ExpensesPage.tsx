@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Wallet, Calendar, User, Trash2, IndianRupee, TrendingDown, ArrowDownRight, Filter } from 'lucide-react';
+import { Plus, Wallet, Calendar, User, Trash2, TrendingDown, Filter, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Expense } from '../types';

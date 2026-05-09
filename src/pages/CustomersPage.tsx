@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Users, Search, ShoppingBag, TrendingUp, ChevronRight } from 'lucide-react';
+import { Users, Search, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const CustomersPage: React.FC = () => {
