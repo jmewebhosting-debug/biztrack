@@ -12,12 +12,24 @@ import CustomersPage from './pages/CustomersPage';
 import AppLock from './components/shared/AppLock';
 
 const App: React.FC = () => {
-  const [isUnlocked, setIsUnlocked] = React.useState(false);
+  const [isUnlocked, setIsUnlocked] = React.useState(() => {
+    const lastUnlock = localStorage.getItem('last_unlock_time');
+    if (lastUnlock) {
+      const timeDiff = Date.now() - parseInt(lastUnlock, 10);
+      return timeDiff < 24 * 60 * 60 * 1000; // 24 hours
+    }
+    return false;
+  });
+
+  const handleUnlock = () => {
+    setIsUnlocked(true);
+    localStorage.setItem('last_unlock_time', Date.now().toString());
+  };
 
   return (
     <Router>
       {!isUnlocked ? (
-        <AppLock onUnlock={() => setIsUnlocked(true)} />
+        <AppLock onUnlock={handleUnlock} />
       ) : (
         <MainLayout>
           <Routes>

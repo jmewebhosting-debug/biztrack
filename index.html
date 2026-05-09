@@ -3,16 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Viewport: No zooming, full mobile support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- PWA / Theme -->
     <meta name="theme-color" content="#6366f1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="BizTracker" />
+    <link rel="apple-touch-icon" href="/icon.png" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Business Tracker Pro</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SEO -->
+    <title>Business Tracker Pro — Sales, Expenses & Analytics</title>
+    <meta name="description" content="Professional local-first business tracker. Manage sales, expenses, dues, customer CRM and analytics — all secured with PIN and stored privately on your device." />
+    <meta name="robots" content="noindex, nofollow" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <!-- Prevent flash of unstyled content -->
+    <style>
+      body { background: #0f172a; margin: 0; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

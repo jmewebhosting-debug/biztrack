@@ -1,16 +1,26 @@
 {
   "short_name": "BizTracker",
-  "name": "Business & Expense Tracker Pro",
+  "name": "Business Tracker Pro",
+  "description": "Professional business, sales & expense tracker with PIN security",
   "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#6366f1",
-  "background_color": "#0f172a"
+  "background_color": "#0f172a",
+  "categories": ["finance", "business", "productivity"]
 }

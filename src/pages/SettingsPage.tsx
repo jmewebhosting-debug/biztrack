@@ -1,11 +1,55 @@
-import React, { useRef } from 'react';
-import { Download, Upload, Trash2, ShieldCheck, Database, Info, HardDrive, Bell } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Download, Upload, Trash2, ShieldCheck, Database, Info, HardDrive, Bell, Key, Lock, CheckCircle2, ChevronRight, Sun, Moon, RefreshCcw } from 'lucide-react';
 import { exportData, importData, exportToCSV } from '../utils/backup';
 import { requestNotificationPermission } from '../utils/notifications';
 import { db } from '../db/db';
+import { motion } from 'framer-motion';
+
+const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; color?: string }> = ({ icon, title, color = '#6366f1' }) => (
+  <div className="flex items-center gap-2.5 mb-1">
+    <div className="p-1.5 rounded-lg" style={{ background: `${color}18` }}>
+      {React.cloneElement(icon as React.ReactElement, { size: 15, color })}
+    </div>
+    <h3 className="text-xs font-extrabold uppercase tracking-[0.15em]" style={{ color }}>{title}</h3>
+  </div>
+);
+
+const SettingsRow: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  onClick?: () => void;
+  iconBg?: string;
+  iconColor?: string;
+  danger?: boolean;
+  rightContent?: React.ReactNode;
+}> = ({ icon, title, subtitle, onClick, iconBg = 'rgba(99,102,241,0.1)', iconColor = '#818cf8', danger = false, rightContent }) => (
+  <button
+    onClick={onClick}
+    className="flex items-center justify-between p-4 rounded-2xl w-full text-left transition-all active:scale-98"
+    style={{ background: danger ? 'rgba(239,68,68,0.05)' : 'rgba(255,255,255,0.04)', border: `1px solid ${danger ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.07)'}` }}
+  >
+    <div className="flex items-center gap-3">
+      <div className="p-2.5 rounded-xl flex-shrink-0" style={{ background: iconBg }}>
+        {React.cloneElement(icon as React.ReactElement, { size: 18, color: iconColor })}
+      </div>
+      <div>
+        <h4 className="text-sm font-bold" style={{ color: danger ? '#f87171' : undefined }}>{title}</h4>
+        <p className="text-[10px] text-text-muted mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+    {rightContent || <ChevronRight size={16} color="#475569" />}
+  </button>
+);
 
 const SettingsPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [notifGranted, setNotifGranted] = useState(Notification.permission === 'granted');
+  const [changingPin, setChangingPin] = useState(false);
+  const [pinStep, setPinStep] = useState<'old' | 'new' | 'confirm'>('old');
+  const [oldPin, setOldPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [pinError, setPinError] = useState('');
 
   const handleExport = async () => {
     try {
@@ -18,31 +62,25 @@ const SettingsPage: React.FC = () => {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (confirm('Warning: This will overwrite ALL current data with the backup file. Continue?')) {
+    if (confirm('Warning: This will OVERWRITE all current data with the backup. Continue?')) {
       try {
         await importData(file);
-        alert('Data restored successfully! Refreshing...');
+        alert('Data restored! Refreshing...');
         window.location.reload();
       } catch (err) {
         alert('Import failed: ' + err);
       }
     }
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleClearAll = async () => {
-    if (confirm('CRITICAL WARNING: This will delete EVERY record in your database. This cannot be undone. Are you absolutely sure?')) {
-      const pin = prompt('Type "DELETE" to confirm:');
-      if (pin === 'DELETE') {
+    if (confirm('CRITICAL: This deletes ALL records permanently. Are you absolutely sure?')) {
+      const confirm2 = prompt('Type "DELETE ALL" to confirm:');
+      if (confirm2 === 'DELETE ALL') {
         await Promise.all([
-          db.sales.clear(),
-          db.expenses.clear(),
-          db.dues.clear(),
-          db.providers.clear(),
-          db.providerTransactions.clear(),
-          db.products.clear()
+          db.sales.clear(), db.expenses.clear(), db.dues.clear(),
+          db.providers.clear(), db.providerTransactions.clear(), db.products.clear()
         ]);
         alert('All data cleared.');
         window.location.reload();
@@ -50,136 +88,186 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleNotif = async () => {
+    const granted = await requestNotificationPermission();
+    setNotifGranted(granted);
+    alert(granted ? '✅ Renewal alerts enabled!' : '❌ Notifications denied. Enable in browser settings.');
+  };
+
+  const handlePinChange = () => {
+    const savedPin = localStorage.getItem('app_pin');
+    if (pinStep === 'old') {
+      if (oldPin === savedPin) {
+        setPinStep('new');
+        setPinError('');
+      } else {
+        setPinError('Wrong current PIN');
+        setOldPin('');
+      }
+    } else if (pinStep === 'new') {
+      if (newPin.length === 4) {
+        setPinStep('confirm');
+        setPinError('');
+      } else {
+        setPinError('PIN must be 4 digits');
+      }
+    } else {
+      if (newPin === oldPin) {
+        setPinError('New PIN same as old');
+        setPinStep('new');
+        setNewPin('');
+      } else if (newPin === prompt('Enter new PIN again to confirm:')) {
+        localStorage.setItem('app_pin', newPin);
+        setPinError('');
+        setChangingPin(false);
+        setPinStep('old');
+        setOldPin('');
+        setNewPin('');
+        alert('✅ PIN changed successfully!');
+      } else {
+        setPinError('PINs do not match');
+        setPinStep('new');
+        setNewPin('');
+      }
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold font-heading">Settings</h2>
+    <div className="flex flex-col gap-6 pb-20">
+      <div>
+        <h2 className="text-2xl font-bold font-heading">Settings</h2>
+        <p className="text-xs text-text-muted mt-0.5">App configuration & data management</p>
+      </div>
 
-      <div className="flex flex-col gap-4">
-        {/* Reports & Exports */}
-        <div className="glass p-5 flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-emerald-400">
-            <Database size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">Excel / CSV Reports</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-             <button onClick={() => exportToCSV('sales')} className="btn-secondary py-2 text-[10px] flex items-center justify-center gap-2">
-                <Download size={14} /> Sales CSV
-             </button>
-             <button onClick={() => exportToCSV('expenses')} className="btn-secondary py-2 text-[10px] flex items-center justify-center gap-2">
-                <Download size={14} /> Expenses CSV
-             </button>
-          </div>
-          <button 
-            onClick={async () => {
-              const granted = await requestNotificationPermission();
-              if (granted) alert('Renewal alerts enabled!');
-              else alert('Notifications denied. Please enable in browser settings.');
-            }}
-            className="btn-primary py-2 text-xs flex items-center justify-center gap-2 mt-2"
+      {/* Reports Section */}
+      <div className="glass p-5 flex flex-col gap-3">
+        <SectionHeader icon={<Database />} title="Export Reports" color="#10b981" />
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => exportToCSV('sales')}
+            className="flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all"
+            style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', color: '#34d399' }}
           >
-            <Bell size={16} /> Enable Renewal Alerts
+            <Download size={14} /> Sales CSV
           </button>
-        </div>
-
-        {/* Data Management */}
-        <div className="glass p-5 flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-primary">
-            <Database size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">Data Management</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-3">
-            <button 
-              onClick={handleExport}
-              className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
-                  <Download size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold">Export Backup</h4>
-                  <p className="text-[10px] text-text-muted">Save your data to a .json file</p>
-                </div>
-              </div>
-            </button>
-
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
-                  <Upload size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold">Restore Backup</h4>
-                  <p className="text-[10px] text-text-muted">Load data from a previous backup</p>
-                </div>
-              </div>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImport} 
-                className="hidden" 
-                accept=".json"
-              />
-            </button>
-
-            <button 
-              onClick={handleClearAll}
-              className="flex items-center justify-between p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl hover:bg-rose-500/10 transition-all text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-rose-500/10 text-rose-400 rounded-lg">
-                  <Trash2 size={20} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-rose-400">Clear All Data</h4>
-                  <p className="text-[10px] text-rose-400/60">Permanently delete all records</p>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Security Info */}
-        <div className="glass p-5 flex flex-col gap-3 bg-emerald-500/5 border-emerald-500/10">
-          <div className="flex items-center gap-2 text-emerald-400">
-            <ShieldCheck size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">Privacy & Security</h3>
-          </div>
-          <p className="text-xs text-text-muted leading-relaxed">
-            This app uses <strong>Local-First</strong> technology. Your data never leaves this device unless you manually export a backup. 
-            No cloud servers, no tracking, total privacy.
-          </p>
-        </div>
-
-        {/* App Info */}
-        <div className="glass p-5 flex flex-col gap-4">
-          <div className="flex items-center gap-2 text-text-muted">
-            <Info size={18} />
-            <h3 className="text-sm font-bold uppercase tracking-wider">App Information</h3>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-center text-xs">
-               <span className="text-text-muted">Version</span>
-               <span className="font-mono">1.0.0-PRO</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-               <span className="text-text-muted">Storage Engine</span>
-               <span className="font-mono flex items-center gap-1"><HardDrive size={10} /> IndexedDB</span>
-            </div>
-            <div className="flex justify-between items-center text-xs">
-               <span className="text-text-muted">Build ID</span>
-               <span className="font-mono">May-2026-STABLE</span>
-            </div>
-          </div>
+          <button
+            onClick={() => exportToCSV('expenses')}
+            className="flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
+          >
+            <Download size={14} /> Expenses CSV
+          </button>
         </div>
       </div>
 
-      <div className="text-center py-4">
-        <p className="text-[10px] text-text-muted uppercase tracking-[0.2em]">Designed for Excellence</p>
+      {/* Notifications */}
+      <div className="glass p-5 flex flex-col gap-3">
+        <SectionHeader icon={<Bell />} title="Notifications" color="#f59e0b" />
+        <SettingsRow
+          icon={<Bell />}
+          title={notifGranted ? 'Renewal Alerts Active' : 'Enable Renewal Alerts'}
+          subtitle={notifGranted ? 'You will be notified before renewals expire' : 'Get notified when client renewals are due'}
+          onClick={handleNotif}
+          iconBg="rgba(245,158,11,0.1)"
+          iconColor="#fbbf24"
+          rightContent={notifGranted
+            ? <CheckCircle2 size={18} color="#10b981" />
+            : <ChevronRight size={16} color="#475569" />
+          }
+        />
+      </div>
+
+      {/* Security */}
+      <div className="glass p-5 flex flex-col gap-3">
+        <SectionHeader icon={<ShieldCheck />} title="Security" color="#6366f1" />
+        <SettingsRow
+          icon={<Key />}
+          title="Change App PIN"
+          subtitle="Update your 4-digit security PIN"
+          onClick={() => {
+            const currentPin = prompt('Enter your CURRENT 4-digit PIN:');
+            const savedPin = localStorage.getItem('app_pin');
+            if (currentPin !== savedPin) {
+              alert('❌ Wrong PIN!');
+              return;
+            }
+            const newPinVal = prompt('Enter your NEW 4-digit PIN:');
+            if (!newPinVal || newPinVal.length !== 4 || !/^\d{4}$/.test(newPinVal)) {
+              alert('❌ Invalid PIN. Must be exactly 4 digits.');
+              return;
+            }
+            const confirmPinVal = prompt('Confirm your NEW PIN:');
+            if (newPinVal !== confirmPinVal) {
+              alert('❌ PINs do not match!');
+              return;
+            }
+            localStorage.setItem('app_pin', newPinVal);
+            alert('✅ PIN changed successfully!');
+          }}
+          iconBg="rgba(99,102,241,0.1)"
+          iconColor="#818cf8"
+        />
+        <div className="flex items-start gap-3 p-3 rounded-xl" style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.12)' }}>
+          <ShieldCheck size={16} color="#34d399" className="flex-shrink-0 mt-0.5" />
+          <p className="text-[10px] text-text-muted leading-relaxed">
+            <strong className="text-emerald-400">100% Local Storage.</strong> Your data never leaves this device. No cloud, no tracking, total privacy. Built with IndexedDB.
+          </p>
+        </div>
+      </div>
+
+      {/* Data Management */}
+      <div className="glass p-5 flex flex-col gap-3">
+        <SectionHeader icon={<HardDrive />} title="Data Management" color="#818cf8" />
+        <div className="flex flex-col gap-2.5">
+          <SettingsRow
+            icon={<Download />}
+            title="Export Full Backup"
+            subtitle="Download all data as a .json file"
+            onClick={handleExport}
+            iconBg="rgba(59,130,246,0.1)"
+            iconColor="#60a5fa"
+          />
+          <SettingsRow
+            icon={<Upload />}
+            title="Restore from Backup"
+            subtitle="Load data from a previous backup file"
+            onClick={() => fileInputRef.current?.click()}
+            iconBg="rgba(168,85,247,0.1)"
+            iconColor="#c084fc"
+          />
+          <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".json" />
+          <SettingsRow
+            icon={<Trash2 />}
+            title="Clear All Data"
+            subtitle="Permanently delete every record (irreversible)"
+            onClick={handleClearAll}
+            iconBg="rgba(239,68,68,0.1)"
+            iconColor="#f87171"
+            danger
+          />
+        </div>
+      </div>
+
+      {/* App Info */}
+      <div className="glass p-5 flex flex-col gap-4">
+        <SectionHeader icon={<Info />} title="App Information" color="#94a3b8" />
+        {[
+          { label: 'Version', value: '2.0.0-PRO' },
+          { label: 'Storage Engine', value: 'IndexedDB (Dexie)' },
+          { label: 'Session', value: '24-hour PIN unlock' },
+          { label: 'Build', value: 'May-2026-STABLE' },
+        ].map(row => (
+          <div key={row.label} className="flex justify-between items-center text-xs border-b border-white/5 pb-3 last:border-none last:pb-0">
+            <span className="text-text-muted">{row.label}</span>
+            <span className="font-mono font-bold">{row.value}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-center py-2">
+        <p className="text-[10px] text-text-muted uppercase tracking-[0.2em] opacity-40">
+          Business Tracker Pro • Designed for Excellence
+        </p>
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ const ExpensesPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fadeIn">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold font-heading">Expenses</h2>
@@ -123,12 +123,14 @@ const ExpensesPage: React.FC = () => {
 
 const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const accounts = useLiveQuery(() => db.accounts.toArray()) || [];
+  const today = format(new Date(), 'yyyy-MM-dd');
   const [formData, setFormData] = useState({
     category: '',
     amount: '',
     accountId: '',
     member: '',
-    note: ''
+    note: '',
+    expenseDate: today
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -138,7 +140,7 @@ const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const newExpense: Expense = {
       category: formData.category,
       amount: parseFloat(formData.amount),
-      date: new Date(),
+      date: formData.expenseDate ? new Date(formData.expenseDate + 'T12:00:00') : new Date(),
       accountId: parseInt(formData.accountId),
       member: formData.member,
       note: formData.note
@@ -156,33 +158,33 @@ const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="bottom-sheet flex flex-col shadow-2xl"
+        className="bottom-sheet w-full max-w-md z-50 flex flex-col shadow-2xl"
       >
         <div className="sheet-handle" />
-        <div className="p-6 pt-2 border-b border-white/5 flex justify-between items-center">
+        <div className="px-6 py-4 flex justify-between items-center">
           <div>
             <h3 className="text-xl font-bold font-heading">New Expense</h3>
-            <p className="text-[10px] text-text-muted">Record an outgoing payment</p>
+            <p className="text-[11px] text-text-muted">Record an outgoing payment</p>
           </div>
-          <button onClick={onClose} className="p-3 rounded-2xl bg-white/5 text-text-muted">
-             <Plus size={24} className="rotate-45" />
+          <button onClick={onClose} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-muted transition-all">
+             <Plus size={22} className="rotate-45" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 modal-form-container">
+        <form onSubmit={handleSubmit} className="px-6 pb-8 flex flex-col gap-5 modal-form-container">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Expense Category</label>
-            <input required placeholder="e.g. Server Bill, Office Rent, Tea" className="h-12 text-base" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Expense Type</label>
+            <input required placeholder="e.g. Server Bill, Office Rent, Tea" className="h-12 text-[15px]" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Amount (₹)</label>
-            <input required type="number" placeholder="0" className="h-12 text-base font-bold text-rose-400" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Amount (₹)</label>
+            <input required type="number" placeholder="0" className="h-12 text-[15px] font-bold text-rose-400" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Paid From</label>
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Paid From</label>
             <div className="relative">
-              <select required value={formData.accountId} onChange={(e) => setFormData({...formData, accountId: e.target.value})} className="h-12" >
+              <select required value={formData.accountId} onChange={(e) => setFormData({...formData, accountId: e.target.value})} className="h-12 text-[15px]" >
                 <option value="">Select Bank / Wallet</option>
                 {accounts.map(acc => (
                   <option key={acc.id} value={acc.id}>{acc.name}</option>
@@ -193,17 +195,28 @@ const AddExpenseModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Spent By (Optional)</label>
-            <input placeholder="Member name" className="h-12 text-base" value={formData.member} onChange={(e) => setFormData({...formData, member: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Spent By</label>
+            <input placeholder="Member name (optional)" className="h-12 text-[15px]" value={formData.member} onChange={(e) => setFormData({...formData, member: e.target.value})} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Short Note</label>
-            <textarea placeholder="Any details..." rows={2} className="p-4" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">📅 Expense Date</label>
+            <input
+              type="date"
+              className="h-12 text-[15px]"
+              value={formData.expenseDate}
+              max={today}
+              onChange={(e) => setFormData({...formData, expenseDate: e.target.value})}
+            />
           </div>
 
-          <div className="flex gap-3 mt-4">
-            <button type="submit" className="btn-primary flex-1 h-14 text-base shadow-rose-500/30 bg-rose-500 hover:bg-rose-600">Save Expense</button>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Notes</label>
+            <textarea placeholder="Any details..." rows={2} className="p-4 text-[15px]" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} />
+          </div>
+
+          <div className="mt-4">
+            <button type="submit" className="btn-primary w-full h-14 text-base shadow-rose-500/30 bg-rose-500 hover:bg-rose-600 border-none">Save Expense Record</button>
           </div>
         </form>
       </motion.div>

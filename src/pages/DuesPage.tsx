@@ -33,7 +33,7 @@ const DuesPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fadeIn">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold font-heading">Dues & Ledger</h2>
@@ -246,28 +246,28 @@ const AddEntryModal: React.FC<{ activeTab: 'dues' | 'providers'; onClose: () => 
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="bottom-sheet flex flex-col shadow-2xl"
+        className="bottom-sheet w-full max-w-md z-50 flex flex-col shadow-2xl"
       >
         <div className="sheet-handle" />
-        <div className="p-6 pt-2 border-b border-white/5 flex justify-between items-center">
+        <div className="px-6 py-4 flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-bold font-heading">{activeTab === 'dues' ? 'New Due Record' : 'Provider Transaction'}</h3>
-            <p className="text-[10px] text-text-muted">Manage your ledger entries</p>
+            <h3 className="text-xl font-bold font-heading">{activeTab === 'dues' ? 'New Due Record' : 'Provider Ledger'}</h3>
+            <p className="text-[11px] text-text-muted">Manage your ledger entries</p>
           </div>
-          <button onClick={onClose} className="p-3 rounded-2xl bg-white/5 text-text-muted">
-            <Plus size={24} className="rotate-45" />
+          <button onClick={onClose} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-muted transition-all hover:bg-white/10">
+            <Plus size={22} className="rotate-45" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5 pb-12 overflow-y-auto max-h-[80vh]">
+        <form onSubmit={handleSubmit} className="px-6 pb-8 flex flex-col gap-5 modal-form-container">
           {activeTab === 'dues' ? (
             <>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Customer / Person Name</label>
-                <input required placeholder="Enter full name" className="h-12 text-base" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Client Name</label>
+                <input required placeholder="Enter full name" className="h-12 text-[15px]" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Type of Due</label>
-                <div className="grid grid-cols-2 gap-2">
+                <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Type of Due</label>
+                <div className="grid grid-cols-2 gap-3">
                   <button type="button" onClick={() => setFormData({...formData, type: 'to-receive'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'to-receive' ? 'bg-blue-500 border-blue-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-text-muted'}`}>Receivable</button>
                   <button type="button" onClick={() => setFormData({...formData, type: 'to-pay'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'to-pay' ? 'bg-rose-500 border-rose-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-text-muted'}`}>Payable</button>
                 </div>
@@ -276,10 +276,10 @@ const AddEntryModal: React.FC<{ activeTab: 'dues' | 'providers'; onClose: () => 
           ) : (
             <>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Select Provider</label>
+                <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Select Provider</label>
                 <div className="flex flex-col gap-2">
                   <div className="relative">
-                    <select required value={formData.providerId} onChange={(e) => setFormData({...formData, providerId: e.target.value})} className="h-12 w-full" >
+                    <select required value={formData.providerId} onChange={(e) => setFormData({...formData, providerId: e.target.value})} className="h-12 w-full text-[15px]" >
                       <option value="">Choose Provider...</option>
                       {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
@@ -291,31 +291,31 @@ const AddEntryModal: React.FC<{ activeTab: 'dues' | 'providers'; onClose: () => 
                       const id = await db.providers.add({ name, balance: 0 });
                       setFormData({...formData, providerId: id.toString()});
                     }
-                  }} className="text-[11px] text-primary font-bold self-start px-2">+ Add New Provider</button>
+                  }} className="text-[11px] text-primary font-bold self-start px-1">+ Add New Provider</button>
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Transaction Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button type="button" onClick={() => setFormData({...formData, type: 'payment'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'payment' ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Payment Sent</button>
-                  <button type="button" onClick={() => setFormData({...formData, type: 'refund'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'refund' ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Refund</button>
+                <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Transaction</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => setFormData({...formData, type: 'payment'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'payment' ? 'bg-primary border-primary text-white shadow-primary/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Payment Sent</button>
+                  <button type="button" onClick={() => setFormData({...formData, type: 'refund'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'refund' ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Refund</button>
                 </div>
               </div>
             </>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Amount (₹)</label>
-            <input required type="number" placeholder="0" className="h-12 text-base" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Amount (₹)</label>
+            <input required type="number" placeholder="0" className="h-12 text-[15px]" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-bold text-text-muted tracking-widest ml-1">Reason / Notes</label>
-            <textarea placeholder="Write reason for this entry..." rows={2} className="p-4" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} />
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Notes</label>
+            <textarea placeholder="Details about this entry..." rows={2} className="p-4 text-[15px]" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} />
           </div>
 
-          <div className="flex gap-3 mt-4">
-            <button type="submit" className="btn-primary flex-1 h-14 text-base shadow-lg">Save Ledger Entry</button>
+          <div className="mt-4">
+            <button type="submit" className="btn-primary w-full h-14 text-base shadow-primary/30">Save Ledger Record</button>
           </div>
         </form>
       </motion.div>
