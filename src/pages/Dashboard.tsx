@@ -210,7 +210,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3.5">
         <StatCard title="Revenue" value={revenue} icon={<IndianRupee />} color="blue" />
         <StatCard title="Gross Profit" value={profit} icon={<TrendingUp />} color="green" />
         <StatCard title="Expenses" value={expenses} icon={<TrendingDown />} color="red" trendUp={false} />
