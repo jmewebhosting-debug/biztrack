@@ -16,7 +16,7 @@ import {
   Legend,
 } from 'recharts';
 import { format, subDays } from 'date-fns';
-import { TrendingUp, TrendingDown, Award, Box, Zap, BarChart2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Award, Box, Zap, BarChart2, Calendar } from 'lucide-react';
 
 const COLORS = {
   Software: '#6366f1',
@@ -43,6 +43,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const StatsPage: React.FC = () => {
   const [chartRange, setChartRange] = useState<7 | 14 | 30>(7);
+  const [reportDate, setReportDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const sales = useLiveQuery(() => db.sales.toArray()) || [];
   const expenses = useLiveQuery(() => db.expenses.toArray()) || [];
@@ -113,6 +114,24 @@ const StatsPage: React.FC = () => {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5);
 
+  // Daily Report Data
+  const dailySales = sales.filter(s => format(new Date(s.date), 'yyyy-MM-dd') === reportDate);
+  const dailyExpenses = expenses.filter(e => format(new Date(e.date), 'yyyy-MM-dd') === reportDate);
+  
+  const dailyRevenue = dailySales.reduce((acc, s) => acc + s.price, 0);
+  const dailyProfit = dailySales.reduce((acc, s) => acc + s.profit, 0);
+  const dailyExpenseAmt = dailyExpenses.reduce((acc, e) => acc + e.amount, 0);
+
+  const dailyProductCounts = dailySales.reduce((acc, s) => {
+    acc[s.productName] = (acc[s.productName] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const dailyTopProducts = Object.entries(dailyProductCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-bold font-heading">Analytics</h2>
@@ -141,6 +160,53 @@ const StatsPage: React.FC = () => {
             {netBalance >= 0 ? '+' : ''}₹{netBalance.toLocaleString()}
           </h3>
         </div>
+      </div>
+
+      {/* Daily Report Section */}
+      <div className="glass p-5 flex flex-col gap-4 border-l-4 border-l-primary bg-primary/5">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <Calendar size={16} className="text-primary" /> Daily Performance
+            </h3>
+            <p className="text-[10px] text-text-muted">Pick a date to see detailed stats</p>
+          </div>
+          <input 
+            type="date" 
+            className="h-9 px-3 text-[11px] font-bold bg-white/5 border-white/10 rounded-xl"
+            value={reportDate}
+            onChange={e => setReportDate(e.target.value)}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 mt-1">
+          <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+            <p className="text-[8px] uppercase font-bold text-text-muted">Revenue</p>
+            <p className="text-xs font-bold text-text-main mt-1">₹{dailyRevenue.toLocaleString()}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+            <p className="text-[8px] uppercase font-bold text-text-muted">Profit</p>
+            <p className="text-xs font-bold text-emerald-400 mt-1">₹{dailyProfit.toLocaleString()}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+            <p className="text-[8px] uppercase font-bold text-text-muted">Expense</p>
+            <p className="text-xs font-bold text-rose-400 mt-1">₹{dailyExpenseAmt.toLocaleString()}</p>
+          </div>
+        </div>
+
+        {dailyTopProducts.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-[9px] uppercase font-bold text-text-muted tracking-widest px-1">Top Selling (Today)</p>
+            <div className="flex flex-col gap-1.5">
+              {dailyTopProducts.map((p, i) => (
+                <div key={p.name} className="flex justify-between items-center px-3 py-2 bg-white/5 rounded-lg border border-white/5">
+                   <span className="text-[10px] font-bold truncate max-w-[150px]">{p.name}</span>
+                   <span className="text-[10px] font-black text-primary">{p.count}x</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Revenue vs Expenses Chart */}

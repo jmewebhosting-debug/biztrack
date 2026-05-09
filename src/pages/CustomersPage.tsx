@@ -1,170 +1,194 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Users, Search, ChevronRight, TrendingUp, Crown, Star } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users, Search, Phone, Mail, MapPin, Trash2, Edit2, MessageCircle, ShoppingBag, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 
 const CustomersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const customers = useLiveQuery(() => db.customers.toArray()) || [];
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
-  const customerStats = useLiveQuery(async () => {
-    const sales = await db.sales.toArray();
-    const stats: Record<string, { totalSpent: number; orderCount: number; lastOrder: Date; profit: number; categories: Set<string> }> = {};
+  const filteredCustomers = customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.phone && c.phone.includes(searchTerm))
+  ).sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0));
 
-    sales.forEach(sale => {
-      if (!stats[sale.customerName]) {
-        stats[sale.customerName] = { totalSpent: 0, orderCount: 0, lastOrder: new Date(0), profit: 0, categories: new Set() };
-      }
-      stats[sale.customerName].totalSpent += sale.price;
-      stats[sale.customerName].orderCount += 1;
-      stats[sale.customerName].profit += sale.profit;
-      stats[sale.customerName].categories.add(sale.category);
-      if (new Date(sale.date) > stats[sale.customerName].lastOrder) {
-        stats[sale.customerName].lastOrder = new Date(sale.date);
-      }
-    });
-
-    return Object.entries(stats)
-      .map(([name, data]) => ({ name, ...data, categories: Array.from(data.categories) }))
-      .sort((a, b) => b.totalSpent - a.totalSpent);
-  }, []);
-
-  const filteredCustomers = customerStats?.filter(c =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
-
-  const totalCustomers = customerStats?.length || 0;
-  const totalRevenue = customerStats?.reduce((acc, c) => acc + c.totalSpent, 0) || 0;
-  const avgOrderValue = totalCustomers > 0 ? totalRevenue / (customerStats?.reduce((acc, c) => acc + c.orderCount, 0) || 1) : 0;
-
-  const getTierInfo = (spent: number, count: number) => {
-    if (spent >= 10000 || count >= 5) return { label: 'VIP', color: '#f59e0b', icon: <Crown size={10} /> };
-    if (spent >= 5000 || count >= 3) return { label: 'Regular', color: '#6366f1', icon: <Star size={10} /> };
-    return { label: 'New', color: '#94a3b8', icon: null };
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
   };
 
-  const avatarColors = ['#6366f1', '#a855f7', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#06b6d4'];
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 }
+  };
+
+  const handleDelete = async (id?: number) => {
+    if (id && confirm('Are you sure? This will not delete their sale records.')) {
+      await db.customers.delete(id);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold font-heading">Customer CRM</h2>
-        <p className="text-xs text-text-muted">Your complete client intelligence hub</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold font-heading">Customers CRM</h2>
+          <p className="text-xs text-text-muted">Manage your client directory</p>
+        </div>
       </div>
 
-      {/* Summary Row */}
-      {totalCustomers > 0 && (
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="glass p-3.5 flex flex-col gap-1" style={{ background: 'rgba(99,102,241,0.06)' }}>
-            <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Clients</p>
-            <p className="text-lg font-bold text-primary">{totalCustomers}</p>
-          </div>
-          <div className="glass p-3.5 flex flex-col gap-1" style={{ background: 'rgba(16,185,129,0.06)' }}>
-            <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Revenue</p>
-            <p className="text-lg font-bold text-emerald-400">₹{(totalRevenue / 1000).toFixed(1)}K</p>
-          </div>
-          <div className="glass p-3.5 flex flex-col gap-1" style={{ background: 'rgba(168,85,247,0.06)' }}>
-            <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Avg Order</p>
-            <p className="text-lg font-bold text-purple-400">₹{Math.round(avgOrderValue).toLocaleString()}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted" size={16} />
-        <input
-          type="text"
-          placeholder="Search customer..."
-          className="pl-11 h-11 text-sm"
+      <div className="relative group">
+        <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted group-focus-within:text-primary transition-colors" size={16} />
+        <input 
+          type="text" 
+          placeholder="Search customers by name or phone..." 
+          className="pl-11 h-12 text-sm bg-white/[0.03]"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {/* Customer List */}
-      <div className="flex flex-col gap-3">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="grid grid-cols-1 gap-3.5"
+      >
         {filteredCustomers.length > 0 ? (
-          filteredCustomers.map((customer, i) => {
-            const tier = getTierInfo(customer.totalSpent, customer.orderCount);
-            const avatarColor = avatarColors[i % avatarColors.length];
-            const margin = customer.profit > 0 ? Math.round((customer.profit / customer.totalSpent) * 100) : 0;
-
-            return (
-              <motion.div
-                key={customer.name}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                className="glass p-4 flex flex-col gap-3 card-hover"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Rank + Avatar */}
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
-                        style={{ background: `linear-gradient(135deg, ${avatarColor}, ${avatarColor}99)` }}>
-                        {customer.name[0].toUpperCase()}
-                      </div>
-                      {i < 3 && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-extrabold text-white"
-                          style={{ background: i === 0 ? '#f59e0b' : i === 1 ? '#94a3b8' : '#cd7f32' }}>
-                          #{i + 1}
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-sm truncate max-w-[110px]">{customer.name}</h3>
-                        <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-0.5"
-                          style={{ color: tier.color, background: `${tier.color}18`, border: `1px solid ${tier.color}30` }}>
-                          {tier.icon} {tier.label}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-text-muted mt-0.5">
-                        {customer.orderCount} orders • Last: {format(customer.lastOrder, 'dd MMM yy')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-base font-bold" style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                      ₹{customer.totalSpent.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-text-muted">Lifetime Value</p>
-                  </div>
-                </div>
-
-                {/* Stats Row */}
-                <div className="flex gap-2 pt-2 border-t border-white/5">
-                  <div className="flex-1 text-center">
-                    <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Profit</p>
-                    <p className="text-xs font-bold text-emerald-400 mt-0.5">₹{customer.profit.toLocaleString()}</p>
-                  </div>
-                  <div className="w-px bg-white/5" />
-                  <div className="flex-1 text-center">
-                    <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Margin</p>
-                    <p className="text-xs font-bold text-primary mt-0.5">{margin}%</p>
-                  </div>
-                  <div className="w-px bg-white/5" />
-                  <div className="flex-1 text-center">
-                    <p className="text-[8px] uppercase font-extrabold text-text-muted tracking-widest">Services</p>
-                    <p className="text-xs font-bold mt-0.5">{customer.categories.slice(0, 2).join(', ')}</p>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })
+          filteredCustomers.map((customer) => (
+            <CustomerCard 
+              key={customer.id} 
+              customer={customer} 
+              onDelete={() => handleDelete(customer.id)} 
+              onViewHistory={() => setSelectedCustomer(customer)}
+              variants={itemVariants}
+            />
+          ))
         ) : (
           <div className="glass p-12 text-center flex flex-col items-center gap-3 opacity-60">
-            <Users size={40} className="text-text-muted" />
-            <p className="text-sm font-medium">
-              {searchTerm ? 'No customers match your search.' : 'No customers yet. Add your first sale!'}
-            </p>
+             <Users size={40} className="text-text-muted" />
+             <p className="text-sm">No customers found.</p>
           </div>
         )}
-      </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {selectedCustomer && (
+          <HistoryDrawer 
+            customer={selectedCustomer} 
+            onClose={() => setSelectedCustomer(null)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+};
+
+const CustomerCard: React.FC<{ customer: any; onDelete: () => void; onViewHistory: () => void; variants: any }> = ({ customer, onDelete, onViewHistory, variants }) => {
+  const isVIP = (customer.totalSpent || 0) > 10000;
+  
+  return (
+    <motion.div 
+      variants={variants}
+      className="glass p-5 flex flex-col gap-4 card-hover relative overflow-hidden"
+    >
+      {isVIP && (
+         <div className="absolute top-0 right-0 bg-amber-500 text-white text-[7px] font-black px-3 py-1 rounded-bl-lg flex items-center gap-1 shadow-lg shadow-amber-500/20">
+            👑 VIP CLIENT
+         </div>
+      )}
+      <div className="flex justify-between items-start" onClick={onViewHistory}>
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xl border border-primary/20">
+            {customer.name[0]}
+          </div>
+          <div>
+            <h4 className="text-base font-bold">{customer.name}</h4>
+            {customer.phone && (
+              <div className="flex items-center gap-1.5 text-[10px] text-text-muted font-bold mt-0.5">
+                <Phone size={10} className="text-primary" />
+                {customer.phone}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+           <div className={`flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-lg ${isVIP ? 'text-amber-500 bg-amber-500/10' : 'text-emerald-400 bg-emerald-400/10'}`}>
+              <ShoppingBag size={10} /> ₹{(customer.totalSpent || 0).toLocaleString()}
+           </div>
+           {customer.lastPurchaseDate && (
+             <span className="text-[8px] text-text-muted uppercase font-bold tracking-tighter">
+                Last: {format(new Date(customer.lastPurchaseDate), 'dd MMM yy')}
+             </span>
+           )}
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center pt-4 border-t border-white/5">
+        <div className="flex gap-2">
+           {customer.phone && (
+             <button 
+                onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/${customer.phone.replace(/\D/g, '')}`, '_blank'); }}
+                className="h-9 px-4 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all flex items-center gap-2 text-[10px] font-bold border border-emerald-500/20"
+             >
+                <MessageCircle size={14} /> WHATSAPP
+             </button>
+           )}
+           <button 
+              onClick={(e) => { e.stopPropagation(); onViewHistory(); }}
+              className="h-9 px-4 rounded-xl bg-white/5 text-text-muted hover:bg-white/10 transition-all flex items-center gap-2 text-[10px] font-bold border border-white/10"
+           >
+              <Calendar size={14} /> HISTORY
+           </button>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="p-2 rounded-xl bg-rose-500/5 text-rose-400 hover:bg-rose-500/10 border border-rose-500/10 transition-all">
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const HistoryDrawer: React.FC<{ customer: any; onClose: () => void }> = ({ customer, onClose }) => {
+  const sales = useLiveQuery(() => db.sales.where('customerName').equalsIgnoreCase(customer.name).reverse().toArray()) || [];
+
+  return (
+    <>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm" />
+      <motion.div 
+        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} 
+        className="fixed inset-y-0 right-0 w-full max-w-[360px] z-[70] glass-dark border-l border-white/10 p-6 flex flex-col gap-6"
+      >
+        <div className="flex justify-between items-center">
+           <div>
+              <h3 className="text-xl font-bold font-heading">{customer.name}</h3>
+              <p className="text-xs text-text-muted">Purchase History</p>
+           </div>
+           <button onClick={onClose} className="p-2 rounded-xl bg-white/5 text-text-muted"><Trash2 size={20} className="rotate-45" /></button>
+        </div>
+
+        <div className="flex flex-col gap-3 overflow-y-auto pr-2">
+           {sales.map(s => (
+             <div key={s.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex justify-between items-center">
+                <div>
+                   <h4 className="text-sm font-bold">{s.productName}</h4>
+                   <p className="text-[10px] text-text-muted">{format(new Date(s.date), 'dd MMM yyyy')}</p>
+                </div>
+                <div className="text-right">
+                   <p className="text-sm font-bold">₹{s.price.toLocaleString()}</p>
+                   <p className="text-[9px] text-emerald-400">Profit: ₹{s.profit.toLocaleString()}</p>
+                </div>
+             </div>
+           ))}
+           {sales.length === 0 && <p className="text-center text-xs text-text-muted py-10">No transactions found.</p>}
+        </div>
+      </motion.div>
+    </>
   );
 };
 

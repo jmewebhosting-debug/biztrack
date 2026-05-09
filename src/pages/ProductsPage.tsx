@@ -7,6 +7,7 @@ import type { Category } from '../types';
 
 const ProductsPage: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const products = useLiveQuery(() => db.products.toArray()) || [];
 
   const handleDelete = async (id?: number) => {
@@ -54,7 +55,12 @@ const ProductsPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="p-2 rounded-lg bg-white/5 text-text-muted hover:text-white transition-all"><Edit2 size={16} /></button>
+                <button 
+                  onClick={() => setEditingProduct(product)}
+                  className="p-2 rounded-lg bg-white/5 text-text-muted hover:text-white transition-all"
+                >
+                  <Edit2 size={16} />
+                </button>
                 <button onClick={() => handleDelete(product.id)} className="p-2 rounded-lg bg-rose-500/5 text-rose-400 hover:bg-rose-500/10 transition-all"><Trash2 size={16} /></button>
               </div>
             </motion.div>
@@ -71,7 +77,100 @@ const ProductsPage: React.FC = () => {
         {isAdding && (
           <AddProductModal onClose={() => setIsAdding(false)} />
         )}
+        {editingProduct && (
+          <EditProductModal product={editingProduct} onClose={() => setEditingProduct(null)} />
+        )}
       </AnimatePresence>
+    </div>
+  );
+};
+
+const EditProductModal: React.FC<{ product: any; onClose: () => void }> = ({ product, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: product.name,
+    category: product.category,
+    cost: product.cost.toString(),
+    price: product.price.toString(),
+    specs: product.specs
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await db.products.update(product.id, {
+      name: formData.name,
+      category: formData.category,
+      cost: parseFloat(formData.cost),
+      price: parseFloat(formData.price),
+      specs: formData.specs
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+      <motion.div 
+        initial={{ y: '100%' }} 
+        animate={{ y: 0 }} 
+        exit={{ y: '100%' }} 
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="bottom-sheet w-full max-w-md z-50 flex flex-col" 
+      >
+        <div className="sheet-handle" />
+        <div className="px-6 py-4 flex justify-between items-center">
+          <div>
+             <h3 className="text-xl font-bold font-heading">Edit Product</h3>
+             <p className="text-[11px] text-text-muted">Update service template</p>
+          </div>
+          <button onClick={onClose} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-text-muted">
+            <Plus size={22} className="rotate-45" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="px-6 pb-8 flex flex-col gap-5 modal-form-container">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Service Type</label>
+            <div className="grid grid-cols-3 gap-3">
+              {['Software', 'VPS', 'Linux'].map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setFormData({...formData, category: cat as Category})}
+                  className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${
+                    formData.category === cat ? 'bg-primary border-primary text-white shadow-lg shadow-primary/30' : 'bg-white/5 border-white/10 text-text-muted'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Display Name</label>
+            <input required placeholder="e.g. 8GB VPS - US Master" className="h-12 text-[15px]" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Base Cost (₹)</label>
+              <input required type="number" placeholder="0" className="h-12 text-[15px]" value={formData.cost} onChange={(e) => setFormData({...formData, cost: e.target.value})} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Selling Price (₹)</label>
+              <input required type="number" placeholder="0" className="h-12 text-[15px] font-bold text-primary" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Technical Specs</label>
+            <textarea required placeholder="8GB RAM, 4 vCPU, 100GB SSD..." rows={2} className="p-4 text-[15px]" value={formData.specs} onChange={(e) => setFormData({...formData, specs: e.target.value})} />
+          </div>
+
+          <div className="mt-4">
+            <button type="submit" className="btn-primary w-full h-14 text-base shadow-primary/40">Update Template</button>
+          </div>
+        </form>
+      </motion.div>
     </div>
   );
 };

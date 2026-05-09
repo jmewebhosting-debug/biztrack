@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Download, Upload, Trash2, ShieldCheck, Database, Info, HardDrive, Bell, Key, Lock, CheckCircle2, ChevronRight, Sun, Moon, RefreshCcw } from 'lucide-react';
+import { Download, Upload, Trash2, ShieldCheck, Database, Info, HardDrive, Bell, Key, Lock, CheckCircle2, ChevronRight, Sun, Moon, RefreshCcw, Building2, Mail, Phone, MapPin, Save } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { exportData, importData, exportToCSV } from '../utils/backup';
 import { requestNotificationPermission } from '../utils/notifications';
 import { db } from '../db/db';
@@ -50,6 +51,38 @@ const SettingsPage: React.FC = () => {
   const [oldPin, setOldPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [pinError, setPinError] = useState('');
+
+  const settings = useLiveQuery(() => db.settings.toCollection().first());
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    businessName: '',
+    email: '',
+    phone: '',
+    address: ''
+  });
+
+  React.useEffect(() => {
+    if (settings) {
+      setProfileData({
+        businessName: settings.businessName,
+        email: settings.email,
+        phone: settings.phone,
+        address: settings.address
+      });
+    }
+  }, [settings]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const existing = await db.settings.toCollection().first();
+    if (existing?.id) {
+      await db.settings.update(existing.id, profileData);
+    } else {
+      await db.settings.add(profileData);
+    }
+    setIsEditingProfile(false);
+    alert('✅ Business Profile Updated!');
+  };
 
   const handleExport = async () => {
     try {
@@ -137,6 +170,107 @@ const SettingsPage: React.FC = () => {
       <div>
         <h2 className="text-2xl font-bold font-heading">Settings</h2>
         <p className="text-xs text-text-muted mt-0.5">App configuration & data management</p>
+      </div>
+
+      {/* Business Profile */}
+      <div className="glass p-5 flex flex-col gap-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="flex justify-between items-center relative z-10">
+          <SectionHeader icon={<Building2 />} title="Business Profile" color="#6366f1" />
+          <button 
+            onClick={() => setIsEditingProfile(!isEditingProfile)}
+            className="text-[10px] font-extrabold text-primary bg-primary/10 px-3 py-1.5 rounded-lg border border-primary/20 hover:bg-primary/20 transition-all"
+          >
+            {isEditingProfile ? 'Cancel' : 'Edit Profile'}
+          </button>
+        </div>
+
+        {isEditingProfile ? (
+          <form onSubmit={handleSaveProfile} className="flex flex-col gap-4 mt-2 relative z-10">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] uppercase font-bold text-text-muted ml-1">Business Name</label>
+                <div className="relative">
+                  <Building2 size={14} className="absolute left-3.5 top-1/2 -translate-y-half text-text-muted" />
+                  <input 
+                    className="h-10 pl-10 text-xs bg-white/5 border-white/10"
+                    value={profileData.businessName}
+                    onChange={e => setProfileData({...profileData, businessName: e.target.value})}
+                    placeholder="Enter business name"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] uppercase font-bold text-text-muted ml-1">Email</label>
+                  <div className="relative">
+                    <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-half text-text-muted" />
+                    <input 
+                      type="email"
+                      className="h-10 pl-10 text-xs bg-white/5 border-white/10"
+                      value={profileData.email}
+                      onChange={e => setProfileData({...profileData, email: e.target.value})}
+                      placeholder="email@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] uppercase font-bold text-text-muted ml-1">Phone</label>
+                  <div className="relative">
+                    <Phone size={14} className="absolute left-3.5 top-1/2 -translate-y-half text-text-muted" />
+                    <input 
+                      className="h-10 pl-10 text-xs bg-white/5 border-white/10"
+                      value={profileData.phone}
+                      onChange={e => setProfileData({...profileData, phone: e.target.value})}
+                      placeholder="+91 00000 00000"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] uppercase font-bold text-text-muted ml-1">Address</label>
+                <div className="relative">
+                  <MapPin size={14} className="absolute left-3.5 top-4 text-text-muted" />
+                  <textarea 
+                    className="pl-10 py-3 text-xs bg-white/5 border-white/10 min-h-[80px]"
+                    value={profileData.address}
+                    onChange={e => setProfileData({...profileData, address: e.target.value})}
+                    placeholder="Enter physical address"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <button type="submit" className="btn-primary h-11 text-xs flex items-center justify-center gap-2 mt-2">
+              <Save size={16} /> Save Changes
+            </button>
+          </form>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 mt-2 relative z-10">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black text-xl border border-primary/20">
+                {profileData.businessName?.[0] || 'B'}
+              </div>
+              <div>
+                <h4 className="text-base font-bold">{profileData.businessName || 'Business Name'}</h4>
+                <p className="text-[10px] text-text-muted font-medium">{profileData.email}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+               <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
+                  <Phone size={14} className="text-primary" />
+                  <span className="text-[10px] font-bold">{profileData.phone}</span>
+               </div>
+               <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3">
+                  <MapPin size={14} className="text-primary" />
+                  <span className="text-[10px] font-bold truncate">{profileData.address}</span>
+               </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reports Section */}

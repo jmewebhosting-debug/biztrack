@@ -11,6 +11,13 @@ export interface Product {
   specs: string;
 }
 
+export interface SaleItem {
+  name: string;
+  category: Category;
+  cost: number;
+  price: number;
+}
+
 export interface Sale {
   id?: number;
   productId?: number;
@@ -21,10 +28,13 @@ export interface Sale {
   profit: number;
   date: Date;
   customerName: string;
+  phone?: string;
   validityDays: number;
   renewalDate: Date;
   status: 'active' | 'expired' | 'renewed';
   notes?: string;
+  items?: SaleItem[];
+  amountPaid?: number;
 }
 
 export interface Expense {
@@ -50,10 +60,18 @@ export interface Provider {
   notes?: string;
 }
 
+export interface Customer {
+  id?: number;
+  name: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+}
+
 export interface ProviderTransaction {
   id?: number;
   providerId: number;
-  type: 'payment' | 'refund';
+  type: 'payment' | 'refund' | 'investment';
   amount: number;
   date: Date;
   note: string;
@@ -67,4 +85,14 @@ export interface Due {
   date: Date;
   status: 'pending' | 'cleared';
   note?: string;
+  saleId?: number;
+}
+
+export interface BusinessSettings {
+  id?: number;
+  businessName: string;
+  email: string;
+  phone: string;
+  address: string;
+  logoText?: string;
 }

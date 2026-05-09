@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Users, ArrowUpCircle, ArrowDownCircle, CheckCircle2, History, Trash2, IndianRupee, MessageCircle, AlertCircle, Clock, ChevronDown } from 'lucide-react';
+import { Plus, Users, ArrowUpCircle, ArrowDownCircle, CheckCircle2, History, Trash2, IndianRupee, MessageCircle, AlertCircle, Clock, ChevronDown, Zap } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Due } from '../types';
@@ -100,8 +100,8 @@ const DuesPage: React.FC = () => {
               providerTx.map(tx => (
                 <div key={tx.id} className="glass p-4 flex justify-between items-center card-hover">
                   <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-xl ${tx.type === 'refund' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-text-muted'}`}>
-                      {tx.type === 'refund' ? <History size={20} /> : <IndianRupee size={20} />}
+                    <div className={`p-3 rounded-xl ${tx.type === 'refund' ? 'bg-emerald-500/10 text-emerald-400' : tx.type === 'investment' ? 'bg-amber-500/10 text-amber-400' : 'bg-white/5 text-text-muted'}`}>
+                      {tx.type === 'refund' ? <History size={20} /> : tx.type === 'investment' ? <Zap size={20} /> : <IndianRupee size={20} />}
                     </div>
                     <div>
                       <h4 className="text-sm font-bold">{providers.find(p => p.id === tx.providerId)?.name || 'Provider'}</h4>
@@ -113,7 +113,7 @@ const DuesPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-base font-bold ${tx.type === 'refund' ? 'text-emerald-400' : 'text-text-main'}`}>
+                    <p className={`text-base font-bold ${tx.type === 'refund' ? 'text-emerald-400' : tx.type === 'investment' ? 'text-amber-400' : 'text-text-main'}`}>
                       {tx.type === 'refund' ? '+' : '-'}₹{tx.amount.toLocaleString()}
                     </p>
                     {tx.note && <p className="text-[9px] text-text-muted truncate max-w-[100px] italic">"{tx.note}"</p>}
@@ -296,9 +296,10 @@ const AddEntryModal: React.FC<{ activeTab: 'dues' | 'providers'; onClose: () => 
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] uppercase font-extrabold text-text-muted tracking-[0.15em] ml-1">Transaction</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setFormData({...formData, type: 'payment'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'payment' ? 'bg-primary border-primary text-white shadow-primary/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Payment Sent</button>
-                  <button type="button" onClick={() => setFormData({...formData, type: 'refund'})} className={`py-3.5 text-xs font-bold rounded-2xl border transition-all ${formData.type === 'refund' ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Refund</button>
+                <div className="grid grid-cols-3 gap-2">
+                  <button type="button" onClick={() => setFormData({...formData, type: 'payment'})} className={`py-3.5 text-[10px] font-bold rounded-2xl border transition-all ${formData.type === 'payment' ? 'bg-primary border-primary text-white shadow-primary/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Payment</button>
+                  <button type="button" onClick={() => setFormData({...formData, type: 'investment'})} className={`py-3.5 text-[10px] font-bold rounded-2xl border transition-all ${formData.type === 'investment' ? 'bg-amber-500 border-amber-500 text-white shadow-amber-500/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Investment</button>
+                  <button type="button" onClick={() => setFormData({...formData, type: 'refund'})} className={`py-3.5 text-[10px] font-bold rounded-2xl border transition-all ${formData.type === 'refund' ? 'bg-emerald-500 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-white/5 border-white/10 text-text-muted'}`}>Refund</button>
                 </div>
               </div>
             </>

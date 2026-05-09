@@ -62,6 +62,9 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return profit - exp;
   }, []) ?? null;
 
+  const lastBackup = localStorage.getItem('last_backup_date');
+  const needsBackup = !lastBackup || (Date.now() - new Date(lastBackup).getTime()) > 7 * 24 * 60 * 60 * 1000;
+
   React.useEffect(() => {
     if (isLight) {
       document.body.classList.add('light');
@@ -96,13 +99,21 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             Business Tracker
           </h1>
           {monthProfit !== null && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse-subtle"
-                style={{ background: monthProfit >= 0 ? '#10b981' : '#ef4444' }} />
-              <span className="text-[9px] font-extrabold uppercase tracking-widest"
-                style={{ color: monthProfit >= 0 ? '#34d399' : '#f87171' }}>
-                {monthProfit >= 0 ? '+' : ''}₹{Math.abs(monthProfit).toLocaleString()} this month
-              </span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse-subtle"
+                  style={{ background: monthProfit >= 0 ? '#10b981' : '#ef4444' }} />
+                <span className="text-[9px] font-extrabold uppercase tracking-widest"
+                  style={{ color: monthProfit >= 0 ? '#34d399' : '#f87171' }}>
+                  {monthProfit >= 0 ? '+' : ''}₹{Math.abs(monthProfit).toLocaleString()} this month
+                </span>
+              </div>
+              {needsBackup && (
+                <div className="flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                   <div className="w-1 h-1 rounded-full bg-amber-500" />
+                   <span className="text-[7px] font-black text-amber-500 uppercase tracking-tighter">BACKUP NEEDED</span>
+                </div>
+              )}
             </div>
           )}
         </div>

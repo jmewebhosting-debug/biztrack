@@ -1,5 +1,6 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, ArrowUpRight, Plus, ShoppingBag, CreditCard, Box, Users, Wallet, IndianRupee, Target, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, Plus, ShoppingBag, CreditCard, Box, Users, Wallet, IndianRupee, Target, RefreshCcw, AlertTriangle, X, MessageCircle } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useFinanceSummary } from '../hooks/useFinance';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -12,6 +13,21 @@ const getGreeting = () => {
   if (hour < 12) return 'Good Morning';
   if (hour < 17) return 'Good Afternoon';
   return 'Good Evening';
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
 };
 
 const StatCard: React.FC<{
@@ -66,6 +82,50 @@ const StatCard: React.FC<{
   );
 };
 
+const Heatmap: React.FC<{ sales: any[] }> = ({ sales }) => {
+  const last14Days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    return format(d, 'yyyy-MM-dd');
+  }).reverse();
+
+  const salesByDate = sales.reduce((acc, s) => {
+    const d = format(new Date(s.date), 'yyyy-MM-dd');
+    acc[d] = (acc[d] || 0) + s.profit;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <div className="flex flex-col gap-3 glass p-5">
+      <h3 className="text-[10px] font-extrabold text-text-muted uppercase tracking-widest flex items-center gap-2">
+        <TrendingUp size={12} className="text-primary" /> 14-Day Profit Heatmap
+      </h3>
+      <div className="flex gap-1.5 h-10 items-end">
+        {last14Days.map(date => {
+          const profit = salesByDate[date] || 0;
+          const height = Math.min((profit / 5000) * 100, 100);
+          return (
+            <div key={date} className="flex-1 bg-white/5 rounded-t-sm relative group">
+              <motion.div 
+                initial={{ height: 0 }}
+                animate={{ height: `${height}%` }}
+                className="absolute bottom-0 left-0 right-0 rounded-t-sm"
+                style={{ 
+                   background: profit > 2000 ? '#818cf8' : profit > 0 ? '#6366f1' : 'transparent',
+                   opacity: profit > 0 ? 1 : 0
+                }}
+              />
+              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-50 glass px-2 py-1 text-[8px] font-bold whitespace-nowrap">
+                {format(new Date(date), 'dd MMM')}: ₹{profit}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const Dashboard: React.FC = () => {
   const { revenue, profit, expenses, net, recentSales } = useFinanceSummary();
 
@@ -87,14 +147,19 @@ const Dashboard: React.FC = () => {
   const MONTHLY_TARGET = 50000;
   const progressPct = Math.min((profit / MONTHLY_TARGET) * 100, 100);
 
+  const progressPct = Math.min((profit / MONTHLY_TARGET) * 100, 100);
+
+  const [isRenewalsOpen, setIsRenewalsOpen] = React.useState(false);
+
   return (
-    <div className="flex flex-col gap-5 pb-20">
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-5 pb-20"
+    >
       {/* Greeting Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col gap-0.5"
-      >
+      <motion.div variants={itemVariants} className="flex flex-col gap-0.5">
         <p className="text-text-muted text-xs font-semibold">{format(new Date(), 'EEEE, dd MMM yyyy')}</p>
         <h2 className="text-2xl font-bold font-heading">{getGreeting()} 👋</h2>
         <p className="text-text-muted text-sm">Here's your business at a glance.</p>
@@ -148,17 +213,19 @@ const Dashboard: React.FC = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard title="Revenue" value={revenue} icon={<IndianRupee />} color="blue" delay={0} />
-        <StatCard title="Gross Profit" value={profit} icon={<TrendingUp />} color="green" delay={0.05} />
-        <StatCard title="Expenses" value={expenses} icon={<TrendingDown />} color="red" trendUp={false} delay={0.1} />
-        <StatCard title="Net Balance" value={net} icon={<CreditCard />} color={net >= 0 ? 'purple' : 'red'} delay={0.15} />
+        <StatCard title="Revenue" value={revenue} icon={<IndianRupee />} color="blue" />
+        <StatCard title="Gross Profit" value={profit} icon={<TrendingUp />} color="green" />
+        <StatCard title="Expenses" value={expenses} icon={<TrendingDown />} color="red" trendUp={false} />
+        <StatCard title="Net Balance" value={net} icon={<CreditCard />} color={net >= 0 ? 'purple' : 'red'} />
       </div>
+
+      <motion.div variants={itemVariants}>
+         <Heatmap sales={recentSales} />
+      </motion.div>
 
       {/* Monthly Goal */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        variants={itemVariants}
         className="glass p-5 flex flex-col gap-3"
         style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(168,85,247,0.06))' }}
       >
@@ -228,14 +295,15 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="flex flex-col gap-2.5">
           {recentSales.length > 0 ? (
-            recentSales.map((sale, i) => (
+            recentSales.map((sale) => (
               <motion.div
                 key={sale.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + i * 0.05 }}
-                className="glass p-4 flex items-center justify-between card-hover"
+                variants={itemVariants}
+                className="glass p-4 flex items-center justify-between card-hover relative overflow-hidden"
               >
+                {sale.profit > 5000 && (
+                   <div className="absolute top-0 right-0 bg-amber-500/10 text-amber-500 text-[7px] font-black px-2 py-0.5 rounded-bl-lg">HIGH VALUE</div>
+                )}
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
                     style={{ background: sale.category === 'Software' ? '#6366f1' : sale.category === 'VPS' ? '#a855f7' : '#10b981' }}>
@@ -261,7 +329,70 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+
+      {/* Renewals Floating Trigger */}
+      {expiringToday.length > 0 && (
+        <motion.button
+          initial={{ scale: 0, rotate: -45 }}
+          animate={{ scale: 1, rotate: 0 }}
+          onClick={() => setIsRenewalsOpen(true)}
+          className="fixed bottom-24 right-5 w-14 h-14 rounded-2xl bg-primary text-white shadow-xl shadow-primary/30 z-50 flex items-center justify-center"
+        >
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full border-2 border-bg-dark text-[10px] font-black flex items-center justify-center">
+            {expiringToday.length}
+          </div>
+          <RefreshCcw size={24} />
+        </motion.button>
+      )}
+
+      {/* Renewals Drawer */}
+      <AnimatePresence>
+        {isRenewalsOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsRenewalsOpen(false)} className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm" />
+            <motion.div 
+              initial={{ x: '100%' }} 
+              animate={{ x: 0 }} 
+              exit={{ x: '100%' }} 
+              className="fixed inset-y-0 right-0 w-full max-w-[320px] z-[70] glass-dark border-l border-white/10 p-6 flex flex-col gap-6"
+            >
+              <div className="flex justify-between items-center">
+                 <div>
+                    <h3 className="text-xl font-bold font-heading">Renewals Hub</h3>
+                    <p className="text-xs text-text-muted">Expiring in 7 days</p>
+                 </div>
+                 <button onClick={() => setIsRenewalsOpen(false)} className="p-2 rounded-xl bg-white/5 text-text-muted"><X size={20} /></button>
+              </div>
+
+              <div className="flex flex-col gap-3 overflow-y-auto pr-2">
+                 {expiringToday.map(s => (
+                   <div key={s.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                         <div className="min-w-0">
+                            <h4 className="text-sm font-bold truncate">{s.productName}</h4>
+                            <p className="text-[10px] text-text-muted">{s.customerName}</p>
+                         </div>
+                         <div className="text-[10px] font-black text-amber-500 px-2 py-0.5 bg-amber-500/10 rounded-full">
+                            {Math.ceil((new Date(s.renewalDate).getTime() - new Date().getTime()) / (1000*60*60*24))}D
+                         </div>
+                      </div>
+                      <div className="flex gap-2">
+                         <button 
+                            onClick={() => window.open(`https://wa.me/${s.phone?.replace(/\D/g, '')}?text=${encodeURIComponent(`Hi ${s.customerName}, your service ${s.productName} is expiring soon. Would you like to renew?`)}`, '_blank')}
+                            className="flex-1 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 text-[10px] font-bold flex items-center justify-center gap-1.5"
+                         >
+                            <MessageCircle size={14} /> REMIND
+                         </button>
+                         <button className="h-9 px-3 rounded-xl bg-primary text-white text-[10px] font-bold">RENEW</button>
+                      </div>
+                   </div>
+                 ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
