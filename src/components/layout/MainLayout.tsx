@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, ShoppingCart, Wallet, Users, Settings, Sun, Moon, X, PieChart, Users2, Package, TrendingUp, LayoutGrid } from 'lucide-react';
+import { Home, ShoppingCart, Wallet, Users, Settings, Sun, Moon, X, PieChart, Users2, Package, TrendingUp, LayoutGrid, FileText } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -77,8 +77,8 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const mainNavItems = [
     { to: '/', icon: <Home size={20} />, label: 'Home' },
+    { to: '/invoices', icon: <FileText size={20} />, label: 'Invoices' },
     { to: '/sales', icon: <ShoppingCart size={20} />, label: 'Sales' },
-    { to: '/expenses', icon: <Wallet size={20} />, label: 'Expense' },
     { to: '/dues', icon: <Users size={20} />, label: 'Dues' },
     { to: '/stats', icon: <TrendingUp size={20} />, label: 'Stats' },
   ];

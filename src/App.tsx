@@ -9,6 +9,7 @@ import StatsPage from './pages/StatsPage';
 import SettingsPage from './pages/SettingsPage';
 import ProductsPage from './pages/ProductsPage';
 import CustomersPage from './pages/CustomersPage';
+import InvoicesPage from './pages/InvoicesPage';
 import AppLock from './components/shared/AppLock';
 
 const App: React.FC = () => {
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
           </Routes>
         </MainLayout>
       )}
