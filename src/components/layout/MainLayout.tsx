@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, ShoppingCart, Wallet, Users, BarChart2, Settings, Box, TrendingUp, Sun, Moon, Menu, X, IndianRupee, PieChart, Users2, Package } from 'lucide-react';
+import { Home, ShoppingCart, Wallet, Users, Settings, Sun, Moon, Menu, X, PieChart, Users2, Package } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
