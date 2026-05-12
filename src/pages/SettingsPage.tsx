@@ -28,7 +28,7 @@ const SettingsRow: React.FC<{
   <button
     onClick={onClick}
     className="flex items-center justify-between p-4 rounded-2xl w-full text-left transition-all active:scale-98"
-    style={{ background: danger ? 'rgba(239,68,68,0.05)' : 'rgba(255,255,255,0.04)', border: `1px solid ${danger ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.07)'}` }}
+    style={{ background: danger ? 'rgba(239,68,68,0.05)' : 'var(--overlay-04)', border: `1px solid ${danger ? 'rgba(239,68,68,0.15)' : 'var(--overlay-border)'}` }}
   >
     <div className="flex items-center gap-3">
       <div className="p-2.5 rounded-xl flex-shrink-0" style={{ background: iconBg }}>

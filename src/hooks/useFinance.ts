@@ -20,7 +20,7 @@ export const useFinanceSummary = () => {
 
   const totalRevenue = currentMonthSales.reduce((acc, s) => acc + s.price, 0);
   const totalCost = currentMonthSales.reduce((acc, s) => acc + s.cost, 0);
-  const totalProfit = totalRevenue - totalCost;
+  const totalProfit = currentMonthSales.reduce((acc, s) => acc + s.profit, 0);
   const totalExpenses = currentMonthExpenses.reduce((acc, e) => acc + e.amount, 0);
 
   return {

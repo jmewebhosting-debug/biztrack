@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/db';
-import { Plus, Box, Edit2, Trash2, Layers } from 'lucide-react';
+import { Plus, Box, Edit2, Trash2, Layers, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Category } from '../types';
 
 const ProductsPage: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<'All' | Category>('All');
   const products = useLiveQuery(() => db.products.toArray()) || [];
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === 'All' ? true : p.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleDelete = async (id?: number) => {
     if (!id) return;
@@ -31,9 +39,35 @@ const ProductsPage: React.FC = () => {
 
       <p className="text-xs text-text-muted px-1">Save your common VPS/Software specs here to reuse them during sales.</p>
 
+      <div className="flex flex-col gap-3">
+        <div className="relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-half text-text-muted group-focus-within:text-primary transition-colors" size={16} />
+          <input 
+            type="text" 
+            placeholder="Search catalog..." 
+            className="pl-11 h-12 text-sm bg-white/[0.04] border-white/5 rounded-2xl"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          {['All', 'Software', 'VPS', 'Linux'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategoryFilter(cat as 'All' | Category)}
+              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all ${
+                categoryFilter === cat ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'bg-white/5 text-text-muted hover:bg-white/10'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4">
-        {products.length > 0 ? (
-          products.map((product) => (
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((product) => (
             <motion.div 
               key={product.id}
               initial={{ opacity: 0, scale: 0.95 }}

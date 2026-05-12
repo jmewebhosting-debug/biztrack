@@ -144,6 +144,11 @@ const SaleCard: React.FC<{ sale: Sale; onEdit: () => void; onDelete: () => void 
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter ${margin > 50 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-text-muted'}`}>
                   {margin}% Margin
                 </span>
+                {sale.discount && sale.discount > 0 && (
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter bg-amber-500/10 text-amber-500">
+                    -₹{sale.discount} Discount
+                  </span>
+                )}
               </div>
            </div>
         </div>
@@ -221,6 +226,9 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [amountPaid, setAmountPaid] = useState('');
   const [items, setItems] = useState<any[]>([]);
   const [autoWhatsApp, setAutoWhatsApp] = useState(true);
+  const [gatewayCharges, setGatewayCharges] = useState('');
+  const [discount, setDiscount] = useState('');
+  const [productSearch, setProductSearch] = useState('');
 
   const handleCustomerChange = (name: string) => {
     setCustomerName(name);
@@ -256,14 +264,19 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const date = new Date(saleDate + 'T12:00:00');
     const validity = parseInt(validityDays);
     const renewalDate = validity === 0 ? addDays(date, 36500) : addDays(date, validity);
-    const paid = amountPaid === '' ? totalPrice : parseFloat(amountPaid);
+    const discountVal = discount === '' ? 0 : parseFloat(discount);
+    const finalPrice = totalPrice - discountVal;
+    const paid = amountPaid === '' ? finalPrice : parseFloat(amountPaid);
+    const charges = gatewayCharges === '' ? 0 : parseFloat(gatewayCharges);
 
     const newSale: Sale = {
       productName: items.length === 1 ? items[0].name : `${items.length} Items Combo`,
       category: items.length === 1 ? items[0].category : 'Software',
       cost: totalCost,
-      price: totalPrice,
-      profit: totalPrice - totalCost,
+      price: finalPrice,
+      profit: finalPrice - totalCost - charges,
+      gatewayCharges: charges,
+      discount: discountVal,
       date,
       customerName,
       validityDays: validity,
@@ -361,6 +374,16 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5">
             <label className="text-[10px] uppercase font-black text-primary tracking-widest">Catalog Items</label>
             <div className="relative">
+              <Search size={14} className="absolute left-4 top-1/2 -translate-y-half text-text-muted" />
+              <input
+                type="text"
+                placeholder="Search catalog..."
+                className="h-10 pl-10 mb-1 text-xs bg-white/[0.04] border-white/5 rounded-xl w-full"
+                value={productSearch}
+                onChange={e => setProductSearch(e.target.value)}
+              />
+            </div>
+            <div className="relative mt-1">
               <select 
                 onChange={(e) => {
                   handleAddItem(e.target.value);
@@ -370,7 +393,7 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 className="h-12 text-xs bg-white/[0.04] border-white/5"
               >
                 <option value="" disabled>Pick products...</option>
-                {products.map(p => (
+                {products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())).map(p => (
                   <option key={p.id} value={p.id}>{p.name} (₹{p.price})</option>
                 ))}
               </select>
@@ -407,19 +430,42 @@ const AddSaleModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
              </div>
              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
                 <p className="text-[9px] uppercase font-black text-primary tracking-widest">Total Price</p>
-                <p className="text-lg font-black text-primary">₹{totalPrice.toLocaleString()}</p>
+                <p className="text-lg font-black text-primary">₹{Math.max(0, totalPrice - (parseFloat(discount) || 0)).toLocaleString()}</p>
              </div>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-black text-emerald-400 tracking-widest ml-1">Payment Received</label>
+            <label className="text-[10px] uppercase font-black text-amber-400 tracking-widest ml-1">Discount Given (₹)</label>
             <input 
               type="number" 
-              placeholder={totalPrice.toString()}
-              className="h-14 text-xl font-black text-emerald-400 bg-white/[0.04] border-white/5 text-center"
-              value={amountPaid}
-              onChange={e => setAmountPaid(e.target.value)}
+              placeholder="0"
+              className="h-14 text-xl font-black text-amber-400 bg-white/[0.04] border-white/5 text-center"
+              value={discount}
+              onChange={e => setDiscount(e.target.value)}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-black text-emerald-400 tracking-widest ml-1">Payment Received</label>
+              <input 
+                type="number" 
+                placeholder={totalPrice.toString()}
+                className="h-14 text-xl font-black text-emerald-400 bg-white/[0.04] border-white/5 text-center"
+                value={amountPaid}
+                onChange={e => setAmountPaid(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-black text-rose-400 tracking-widest ml-1">PG Charges (Fee)</label>
+              <input 
+                type="number" 
+                placeholder="0"
+                className="h-14 text-xl font-black text-rose-400 bg-white/[0.04] border-white/5 text-center"
+                value={gatewayCharges}
+                onChange={e => setGatewayCharges(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -477,6 +523,7 @@ const EditSaleModal: React.FC<{ sale: Sale; onClose: () => void }> = ({ sale, on
     price: sale.price.toString(),
     cost: sale.cost.toString(),
     amountPaid: (sale.amountPaid || sale.price).toString(),
+    gatewayCharges: (sale.gatewayCharges || 0).toString(),
     validityDays: sale.validityDays.toString(),
     notes: sale.notes || '',
     saleDate: format(new Date(sale.date), 'yyyy-MM-dd')
@@ -487,6 +534,7 @@ const EditSaleModal: React.FC<{ sale: Sale; onClose: () => void }> = ({ sale, on
     const price = parseFloat(formData.price);
     const cost = parseFloat(formData.cost);
     const amountPaid = parseFloat(formData.amountPaid);
+    const charges = parseFloat(formData.gatewayCharges);
     const date = new Date(formData.saleDate + 'T12:00:00');
     const validity = parseInt(formData.validityDays);
     const renewalDate = validity === 0 ? addDays(date, 36500) : addDays(date, validity);
@@ -497,7 +545,8 @@ const EditSaleModal: React.FC<{ sale: Sale; onClose: () => void }> = ({ sale, on
       category: formData.category,
       price,
       cost,
-      profit: price - cost,
+      profit: price - cost - charges,
+      gatewayCharges: charges,
       amountPaid,
       date,
       validityDays: validity,
@@ -551,9 +600,15 @@ const EditSaleModal: React.FC<{ sale: Sale; onClose: () => void }> = ({ sale, on
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-black text-emerald-400 tracking-widest ml-1">Amount Paid (₹)</label>
-            <input required type="number" className="h-12 text-[15px] font-black text-emerald-400 bg-white/[0.04] border-white/5" value={formData.amountPaid} onChange={e => setFormData({...formData, amountPaid: e.target.value})} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-black text-emerald-400 tracking-widest ml-1">Amount Paid (₹)</label>
+              <input required type="number" className="h-12 text-[15px] font-black text-emerald-400 bg-white/[0.04] border-white/5" value={formData.amountPaid} onChange={e => setFormData({...formData, amountPaid: e.target.value})} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] uppercase font-black text-rose-400 tracking-widest ml-1">PG Charges (₹)</label>
+              <input required type="number" className="h-12 text-[15px] font-black text-rose-400 bg-white/[0.04] border-white/5" value={formData.gatewayCharges} onChange={e => setFormData({...formData, gatewayCharges: e.target.value})} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

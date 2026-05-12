@@ -121,14 +121,14 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <button
             onClick={() => setIsLight(!isLight)}
             className="p-2.5 rounded-xl transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--overlay-05)', border: '1px solid var(--overlay-border)' }}
           >
             {isLight ? <Moon size={17} color="#94a3b8" /> : <Sun size={17} color="#94a3b8" />}
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
             className="p-2.5 rounded-xl transition-all"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--overlay-05)', border: '1px solid var(--overlay-border)' }}
           >
             <LayoutGrid size={17} color="#94a3b8" />
           </button>
@@ -174,7 +174,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
               className="fixed bottom-0 left-0 right-0 z-70 rounded-t-drawer border-t border-white/8 max-w-600px mx-auto"
               style={{
-                background: 'rgba(15, 23, 42, 0.96)',
+                background: 'var(--bg-card)',
                 backdropFilter: 'blur(40px)',
                 boxShadow: '0 -20px 60px rgba(0,0,0,0.5)',
                 paddingBottom: 'max(2rem, env(safe-area-inset-bottom))',
@@ -192,7 +192,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   <button
                     onClick={() => setIsMenuOpen(false)}
                     className="p-2.5 rounded-2xl transition-all"
-                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
+                    style={{ background: 'var(--overlay-05)', border: '1px solid var(--overlay-border)' }}
                   >
                     <X size={20} color="#94a3b8" />
                   </button>
@@ -205,7 +205,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       to={item.to}
                       onClick={() => setIsMenuOpen(false)}
                       className="flex items-center gap-4 p-4 rounded-2xl transition-all group"
-                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+                      style={{ background: 'var(--overlay-04)', border: '1px solid var(--overlay-border)' }}
                     >
                       <div className="p-3 rounded-xl flex-shrink-0 transition-all"
                         style={{ background: `${item.color}18`, border: `1px solid ${item.color}25` }}>
@@ -216,7 +216,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <p className="text-[10px] text-text-muted mt-0.5">{item.desc}</p>
                       </div>
                       <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        style={{ background: 'var(--overlay-05)' }}>
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                           <path d="M2 5h6M5 2l3 3-3 3" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>

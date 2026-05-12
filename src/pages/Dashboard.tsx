@@ -40,10 +40,10 @@ const StatCard: React.FC<{
   delay?: number;
 }> = ({ title, value, icon, trend, trendUp = true, color, delay = 0 }) => {
   const colors = {
-    blue: { bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.2)', text: '#818cf8', glow: 'rgba(99,102,241,0.15)' },
-    green: { bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', text: '#34d399', glow: 'rgba(16,185,129,0.15)' },
-    red: { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', text: '#f87171', glow: 'rgba(239,68,68,0.15)' },
-    purple: { bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.2)', text: '#c084fc', glow: 'rgba(168,85,247,0.15)' },
+    blue: { bg: 'rgba(99,102,241,0.12)', border: 'rgba(99,102,241,0.25)', text: '#818cf8', glow: 'rgba(99,102,241,0.2)' },
+    green: { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.25)', text: '#34d399', glow: 'rgba(16,185,129,0.2)' },
+    red: { bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.25)', text: '#f87171', glow: 'rgba(239,68,68,0.2)' },
+    purple: { bg: 'rgba(168,85,247,0.12)', border: 'rgba(168,85,247,0.25)', text: '#c084fc', glow: 'rgba(168,85,247,0.2)' },
   };
   const c = colors[color];
 
@@ -169,9 +169,9 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass p-4 flex items-center gap-3 border-l-4"
-          style={{ borderLeftColor: '#ef4444', background: 'rgba(239,68,68,0.05)' }}
+          style={{ borderLeftColor: '#ef4444', background: 'rgba(239,68,68,0.1)' }}
         >
-          <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 flex-shrink-0">
+          <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 flex-shrink-0">
             <AlertTriangle size={18} />
           </div>
           <div className="flex-1 min-w-0">
@@ -192,9 +192,9 @@ const Dashboard: React.FC = () => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="glass p-4 flex items-center gap-3 border-l-4"
-          style={{ borderLeftColor: '#f59e0b', background: 'rgba(245,158,11,0.05)' }}
+          style={{ borderLeftColor: '#f59e0b', background: 'rgba(245,158,11,0.1)' }}
         >
-          <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 flex-shrink-0">
+          <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 flex-shrink-0">
             <RefreshCcw size={18} />
           </div>
           <div className="flex-1 min-w-0">
@@ -225,7 +225,7 @@ const Dashboard: React.FC = () => {
       <motion.div
         variants={itemVariants}
         className="glass p-5 flex flex-col gap-3"
-        style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(168,85,247,0.06))' }}
+        style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1))' }}
       >
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-bold flex items-center gap-2">
@@ -259,10 +259,10 @@ const Dashboard: React.FC = () => {
         <h3 className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { to: '/sales', icon: <Plus size={18} />, label: 'New Sale', bg: 'rgba(99,102,241,0.1)', border: 'rgba(99,102,241,0.2)', iconBg: '#6366f1' },
-            { to: '/expenses', icon: <Wallet size={18} />, label: 'Add Expense', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', iconBg: '#ef4444' },
-            { to: '/products', icon: <Box size={18} />, label: 'Catalog', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', iconBg: '#10b981' },
-            { to: '/dues', icon: <Users size={18} />, label: 'Dues', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.2)', iconBg: '#3b82f6' },
+            { to: '/sales', icon: <Plus size={18} />, label: 'New Sale', bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)', iconBg: '#6366f1' },
+            { to: '/expenses', icon: <Wallet size={18} />, label: 'Add Expense', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.3)', iconBg: '#ef4444' },
+            { to: '/products', icon: <Box size={18} />, label: 'Catalog', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', iconBg: '#10b981' },
+            { to: '/dues', icon: <Users size={18} />, label: 'Dues', bg: 'rgba(59,130,246,0.12)', border: 'rgba(59,130,246,0.3)', iconBg: '#3b82f6' },
           ].map((item, i) => (
             <motion.div
               key={item.to}

@@ -35,6 +35,8 @@ export interface Sale {
   notes?: string;
   items?: SaleItem[];
   amountPaid?: number;
+  gatewayCharges?: number;
+  discount?: number;
 }
 
 export interface Expense {

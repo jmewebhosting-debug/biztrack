@@ -50,11 +50,11 @@ const DuesPage: React.FC = () => {
       {/* Summary Stats */}
       {activeTab === 'dues' && (
         <div className="grid grid-cols-2 gap-3">
-          <div className="glass p-4 bg-blue-500/5 border-blue-500/20">
+          <div className="glass p-4 bg-blue-500/10 border-blue-500/25">
             <p className="text-[10px] uppercase font-bold text-text-muted tracking-widest">To Receive</p>
             <h3 className="text-lg font-bold text-blue-400 mt-1">₹{toReceive.toLocaleString()}</h3>
           </div>
-          <div className="glass p-4 bg-rose-500/5 border-rose-500/20">
+          <div className="glass p-4 bg-rose-500/10 border-rose-500/25">
             <p className="text-[10px] uppercase font-bold text-text-muted tracking-widest">To Pay</p>
             <h3 className="text-lg font-bold text-rose-400 mt-1">₹{toPay.toLocaleString()}</h3>
           </div>
@@ -158,7 +158,7 @@ const DueCard: React.FC<{ due: Due; onClear: () => void; onDelete: () => void; o
 
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${due.type === 'to-receive' ? 'bg-blue-500/10 text-blue-400' : 'bg-rose-500/10 text-rose-400'}`}>
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${due.type === 'to-receive' ? 'bg-blue-500/20 text-blue-400' : 'bg-rose-500/20 text-rose-400'}`}>
             {due.type === 'to-receive' ? <ArrowDownCircle size={24} /> : <ArrowUpCircle size={24} />}
           </div>
           <div>

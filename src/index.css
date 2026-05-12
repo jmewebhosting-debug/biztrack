@@ -1,20 +1,36 @@
+:root {
   --primary: #6366f1;
   --primary-glow: rgba(99, 102, 241, 0.25);
-  --bg-dark: #0f172a;
-  --bg-card: rgba(15, 23, 42, 0.75);
+  --bg-dark: #0a0f1e;
+  --bg-card: rgba(15, 23, 42, 0.85);
+  --bg-input: rgba(255, 255, 255, 0.05);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --overlay-02: rgba(255, 255, 255, 0.02);
+  --overlay-03: rgba(255, 255, 255, 0.03);
+  --overlay-04: rgba(255, 255, 255, 0.04);
+  --overlay-05: rgba(255, 255, 255, 0.05);
+  --overlay-10: rgba(255, 255, 255, 0.1);
+  --overlay-border: rgba(255, 255, 255, 0.1);
+  --overlay-border-5: rgba(255, 255, 255, 0.05);
 }
 
 body.light {
   --bg-dark: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.9);
-  --bg-input: rgba(0, 0, 0, 0.03);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-input: rgba(0, 0, 0, 0.04);
   --text-main: #0f172a;
   --text-muted: #64748b;
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-glow: rgba(99, 102, 241, 0.05);
+  --overlay-02: rgba(0, 0, 0, 0.02);
+  --overlay-03: rgba(0, 0, 0, 0.03);
+  --overlay-04: rgba(0, 0, 0, 0.04);
+  --overlay-05: rgba(0, 0, 0, 0.05);
+  --overlay-10: rgba(0, 0, 0, 0.1);
+  --overlay-border: rgba(0, 0, 0, 0.1);
+  --overlay-border-5: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -197,8 +213,11 @@ body {
 .bg-blue-500\/5 { background-color: rgba(59, 130, 246, 0.05); }
 .bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1); }
 .bg-purple-500\/20 { background-color: rgba(168, 85, 247, 0.2); }
-.bg-white\/5 { background-color: rgba(255, 255, 255, 0.05); }
-.bg-white\/10 { background-color: rgba(255, 255, 255, 0.1); }
+.bg-white\/5 { background-color: var(--overlay-05); }
+.bg-white\/10 { background-color: var(--overlay-10); }
+.bg-white\/\[0\.02\] { background-color: var(--overlay-02); }
+.bg-white\/\[0\.03\] { background-color: var(--overlay-03); }
+.bg-white\/\[0\.04\] { background-color: var(--overlay-04); }
 .bg-black\/40 { background-color: rgba(0, 0, 0, 0.4); }
 .bg-black\/60 { background-color: rgba(0, 0, 0, 0.6); }
 .bg-black\/80 { background-color: rgba(0, 0, 0, 0.8); }
@@ -208,8 +227,8 @@ body {
 .border-t { border-top: 1px solid var(--glass-border); }
 .border-b { border-bottom: 1px solid var(--glass-border); }
 .border-l-4 { border-left: 4px solid var(--primary); }
-.border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
-.border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+.border-white\/5 { border-color: var(--overlay-border-5); }
+.border-white\/10 { border-color: var(--overlay-border); }
 .border-primary\/20 { border-color: rgba(99, 102, 241, 0.2); }
 .border-emerald-500\/20 { border-color: rgba(16, 185, 129, 0.2); }
 .border-rose-500\/20 { border-color: rgba(239, 68, 68, 0.2); }
@@ -263,8 +282,8 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 1.5rem;
   box-shadow: 
-    0 15px 35px rgba(0,0,0,0.25),
-    inset 0 0 0 1px rgba(255,255,255,0.03);
+    0 15px 35px rgba(0,0,0,0.3),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
